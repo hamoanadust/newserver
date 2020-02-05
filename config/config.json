@@ -1,0 +1,43 @@
+{
+    "db_dev": {
+        "user": "admin",
+        "host": "localhost",
+        "database": "postgres",
+        "password": "password",
+        "port": 5432,
+        "max": 20,
+        "idleTimeoutMillis": 30000,
+        "connectionTimeoutMillis": 2000
+    },
+    "web_port": 4000,
+    "tcp_port": 4337,
+    "udp_port": 81234,
+    "saltRounds": 12,
+    "secretKey": "12345-67890-09876-54321",
+    "local_mysql_db": {
+        "connectionLimit" : 10,
+        "connectTimeout"  : 20000,
+        "acquireTimeout"  : 20000,
+        "timeout"         : 20000,
+        "host"     : "localhost",
+        "user"     : "dbadmin",
+        "password" : "1!qQ1234",
+        "database" : "new"
+    },
+    "remote_mysql_db": {
+        "connectionLimit" : 10,
+        "connectTimeout"  : 20000,
+        "acquireTimeout"  : 20000,
+        "timeout"         : 20000,
+        "host"     : "localhost",
+        "user"     : "newuser",
+        "password" : "biddit1234",
+        "database" : "test"
+    },
+    "braintree_config": {
+        "merchantId": "mr7fqmjqgp7t5fkz",
+        "publicKey": "tp2vdz8tpr63kyh2",
+        "privateKey": "c9552d83056654c809d5e993df12f2f5"
+    }
+}
+

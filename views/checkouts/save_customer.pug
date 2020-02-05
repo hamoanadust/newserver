@@ -1,0 +1,22 @@
+extends ../layout
+
+block content
+  .wrapper: .checkout.container: .content
+    header
+      h1(id="title") Remember my payment method
+      p(id="hint") For safty, we will store a payment token instead of your credit card info
+      h1(hidden id="success-result") Payment method remembered
+
+    form#payment-form
+      section
+        .bt-drop-in-wrapper
+          #bt-dropin
+
+      input#nonce(type="hidden" name="payment_method_nonce")
+      button.button(type="submit")
+        span Save
+
+  span(hidden id="client-token")=clientToken
+
+  script(src="https://js.braintreegateway.com/web/dropin/1.20.4/js/dropin.min.js")
+  script(type="text/javascript", src="/bt_save_customer.js")
