@@ -71,7 +71,7 @@ app.use((err, req, res, next) => {
     res.send(err.stack);
 });
 
-
+app.get('/', (req, res, next) => res.json(req.params))
 app.use('/bt', braintree_router);
 app.use('/carpark', carpark_router);
 app.use('/invoice', invoice_router);

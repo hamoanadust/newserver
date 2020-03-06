@@ -38,6 +38,13 @@ season_router.route('/add_season_with_invoice')
     res.json(resp);
 });
 
+season_router.route('/renew_season_with_invoice')
+.post(verify_user, async (req, res, next) => {
+    req.body.data.user = req.user;
+    const resp = await season.renew_season_with_invoice(req.body.data);
+    res.json(resp);
+});
+
 season_router.route('/list_season')
 .post(verify_user, async (req, res, next) => {
     req.body.data.user = req.user;

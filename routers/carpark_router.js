@@ -21,6 +21,12 @@ carpark_router.route('/list_carpark')
     res.json(resp);
 });
 
+carpark_router.route('/list_all_carpark')
+.post(async (req, res, next) => {
+    const resp = await carpark.list_all_carpark(req.body.data);
+    res.json(resp);
+});
+
 module.exports = {
     carpark_router
 };
