@@ -1,83 +1,55 @@
-const express = require('express');
-const app = express();
-const server = require('http').createServer(app);
-const cors = require('cors');
-const path = require('path');
-const { join } = require('path');
-const bodyParser = require('body-parser');
-const config = require('./config/config.json');
-const web_port = config.web_port;
-const { braintree_router } = require('./routers/braintree_router');
-const { carpark_router } = require('./routers/carpark_router');
-const { invoice_router } = require('./routers/invoice_router');
-const { season_router } = require('./routers/season_router');
-const { user_router } = require('./routers/user_router');
-const { vehicle_router } = require('./routers/vehicle_router');
-const fs = require('fs');
-const { corsWithOptions } = require('./services/cors');
+const express = require('express')
+const app = express()
+const http_server = require('http').createServer(app)
+const body_parser = require('body-parser')
+const path = require('path')
+const { join } = require('path')
 
+const { http_port } = require('./config/config.json')
+const { cors_options } = require('./services/cors')
+const { headers } = require('./services/headers')
+const { result } = require('./services/result')
+const { errors } = require('./services/errors')
+const { braintree_router } = require('./routers/braintree_router')
+const { carpark_router } = require('./routers/carpark_router')
+const { invoice_router } = require('./routers/invoice_router')
+const { season_router } = require('./routers/season_router')
+const { user_router } = require('./routers/user_router')
+const { vehicle_router } = require('./routers/vehicle_router')
 
-app.use(corsWithOptions);
-// const staticRoot = join(__dirname, 'services');
+app.use(cors_options)
+app.use(headers)
+app.use(body_parser.json({limit: '50mb'}))
+app.use(body_parser.urlencoded({limit: '50mb', extended: true}))
+app.disable('x-powered-by')
+app.use(express.static(path.join(__dirname, 'services')))
 
-// app.use(express.static(staticRoot));
-// const html = fs.readFileSync( __dirname + '/index.html' );
-// res.json({html: html.toString(), data: obj});
+app.set('views', join(__dirname, 'views'))
+app.set('view engine', 'pug')
 
-// require('./services/io')(io);
-// copy_entire_movement();
+app.get('/', (req, res, next) => next())
+app.get('/success', (req, res, next) => {
+  req.data = {obj: 'result'}
+  next()
+})
+app.get('/error', () => { 
+  throw(new Error('test error')) 
+})
+app.use('/bt', braintree_router)
+app.use('/carpark', carpark_router)
+app.use('/invoice', invoice_router)
+app.use('/season', season_router)
+app.use('/user', user_router)
+app.use('/vehicle', vehicle_router)
+app.get('*', (req, res) => {
+  throw(new Error(`cannot find path ${req.path}`))
+})
+app.use(result)
+app.use(errors)
 
-// let whitelist = ['http://localhost:4200','http://localhost:80'];
-// let corsOptions = {
-//     origin: (origin, callback)=>{
-//         if (whitelist.indexOf(origin) !== -1) {
-//             callback(null, true)
-//         } else {
-//             callback(new Error('Not allowed by CORS'))
-//         }
-//     },credentials: true
-// }
-// app.use(cors(corsOptions));
-
-app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*")
-    res.header("Access-Control-Allow-Headers", "Content-Type")
-    next();
-});
-
-//follow security advice by expressjs
-app.disable('x-powered-by');
-
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-
-app.use(express.static(path.join(__dirname, 'services')));
-
-// app.use('/admin', admin_router);
-
-app.set('views', join(__dirname, 'views'));
-app.set('view engine', 'pug');
-
-// app.get('*', (req, res) => { 
-//     const clientToken = 'test token';
-//     res.render('checkouts/new', {
-//         clientToken
-//     });
-// })
-
-app.use((err, req, res, next) => {
-    console.error('catcing err');
-    console.error(err);
-    res.send(err.stack);
-});
-
-app.get('/', (req, res, next) => res.json(req.params))
-app.use('/bt', braintree_router);
-app.use('/carpark', carpark_router);
-app.use('/invoice', invoice_router);
-app.use('/season', season_router);
-app.use('/user', user_router);
-app.use('/vehicle', vehicle_router);
-
-server.listen(web_port, () => console.log(`Web server listening on port ${web_port}`));
+app.on('error', err => {
+  console.log('ldfkjhgdlkjfhgldkfjhglkdfjhg')
+})
+  
+http_server.listen(http_port, () => console.log(`Http server listening on port ${http_port}`))
 

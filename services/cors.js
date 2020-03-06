@@ -1,14 +1,13 @@
-const cors = require('cors');
+const cors = require('cors')
 
-const whitelist = ['https://rognerfung.github.io/tp-demo', 'http://localhost:4202', 'http://localhost:4201', 'http://localhost:80', undefined];
+const whitelist = ['http://localhost:4201', 'http://localhost:4200', 'http://localhost:80', undefined]
 
-let corsOptions = {
+const option = {
     origin: (origin, callback) => {
-        console.log(origin);
         if (whitelist.indexOf(origin) !== -1) {
             callback(null, true)
         } else {
-            console.log(origin);
+            console.log(origin)
             callback(new Error('Not allowed by CORS'))
         }
     },
@@ -17,5 +16,5 @@ let corsOptions = {
 
 module.exports = {
     cors,
-    corsWithOptions: cors(corsOptions)
+    cors_options: cors(option)
 }

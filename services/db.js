@@ -1,8 +1,8 @@
 const mysql = require('mysql');
 const { local_mysql_db, remote_mysql_db } = require('../config/config.json');
 
-// const pool  = mysql.createPool(local_mysql_db);
-const pool  = mysql.createPool(remote_mysql_db);
+const pool  = mysql.createPool(local_mysql_db);
+// const pool  = mysql.createPool(remote_mysql_db);
 
 exports.pool = pool;
 
@@ -14,7 +14,7 @@ exports.query = sql => {
           }
           resolve(rows);
       });
-  });
+  })
 };
 
 exports.escape = value => {

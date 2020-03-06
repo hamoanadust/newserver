@@ -9,7 +9,7 @@
         "idleTimeoutMillis": 30000,
         "connectionTimeoutMillis": 2000
     },
-    "web_port": 4000,
+    "http_port": 4000,
     "tcp_port": 4337,
     "udp_port": 81234,
     "saltRounds": 12,
