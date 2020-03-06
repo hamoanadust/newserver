@@ -23,12 +23,12 @@ const list_carpark = async data => {
     }
 }
 
-const list_all_carpark = async data => {
+const list_all_carpark = async () => {
     try {
         const resp = await get_carpark_by_condition({ condition: { where: { carpark_id: { gt: 0 } } } });
         return success_res(resp);
     } catch (err) {
-        console.log('list_carpark err:', err);
+        console.log('list_all_carpark err:', err);
         throw(err);
     }
 }
