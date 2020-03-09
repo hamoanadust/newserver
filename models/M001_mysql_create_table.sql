@@ -148,6 +148,21 @@ description VARCHAR(1000),
 CONSTRAINT system_config_id_pk PRIMARY KEY(system_config_id)
 );
 
+CREATE TABLE IF NOT EXISTS request ( 
+request_id SERIAL NOT NULL,
+user_id int,
+request_type enum('CHANGE_VEHICLE', 'CHANGE_IU', 'CHANGE_CASHCARD', 'CHANGE_CARD_TYPE', 'RECURRING_BILLING', 'TERMINATE_SEASON'),
+season_id int,
+vehicle_number varchar(20) not null,
+card_type enum('IU', 'CASHCARD'),
+card_number varchar(16),
+recurring_billing boolean,
+remarks varchar(200),
+effective_datetime datetime,
+status enum('NEW', 'PENDING', 'APPROVED', 'EFFECTIVE', 'REJECTED', 'CANCELLED', 'DELETED'),
+CONSTRAINT request_id_pk PRIMARY KEY(request_id)
+);
+
 insert into iu_type (initial_number, vehicle_type) values
 ('{001, 002, 003, 004}', 'FREE'),
 ('{071, 072, 073, 074, 075, 076, 077}', 'MOTORCYCLE'),

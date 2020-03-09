@@ -15,11 +15,13 @@ const get_carpark_by_condition = async data => {
 
 const list_carpark = async data => {
     try {
-        const resp = await get_carpark_by_condition(data);
-        return success_res(resp);
+        let { whereand, limit, offset, orderby, orderdirection } = data
+        whereand = whereand || { carpark_id: { gt: 0 } }
+        const condition = {where: { whereand }, limit, offset, orderby, orderdirection}
+        const resp = await execute_query('get_item_by_condition', condition, 'carpark', db)
+        return resp
     } catch (err) {
-        console.log('list_carpark err:', err);
-        throw(err);
+        return err
     }
 }
 

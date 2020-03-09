@@ -5,21 +5,20 @@ const moment = require('moment')
 
 const find_season = async data => {
     try {
-        const { card_type, card_number, vehicle_number, user } = data
+        const { season_id, user } = data
+        if (!season_id) return new Error('season_id is required')
         const condition = {
             where: {
                 whereand: {
-                    whereor: {
-                        whereand: {card_type, card_number},
-                        vehicle_number
-                    },
+                    season_id,
                     holder_id: user.user_id
                 }
             },
             limit: 1
         }
         const resp = await execute_query('get_item_by_condition', condition, 'season', db)
-        return resp
+        if (resp && resp.length === 1) return resp[0]
+        else return new Error('Season not found')
     } catch (err) {
         return err
     }
@@ -291,10 +290,23 @@ const add_season_by_admin = async data => {
     }
 }
 
+const list_all_season = async data => {
+    try {
+        const { holder_id } = data
+        const condition = { where: { holder_id }, limit: 'no' }
+        const resp = await execute_query('get_item_by_condition', condition, 'season', db)
+        return resp
+    } catch (err) {
+        return err
+    }
+}
+
 const list_season = async data => {
     try {
-        let { limit, offset, orderby, orderdirection, user } = data
-        const condition = {where: {holder_id: user.user_id}, limit, offset, orderby, orderdirection}
+        let { whereand, limit, offset, orderby, orderdirection, user } = data
+        if (whereand) whereand.holder_id = user.user_id
+        else whereand = { holder_id: user.user_id }
+        const condition = {where: { whereand }, limit, offset, orderby, orderdirection}
         const resp = await execute_query('get_item_by_condition', condition, 'season', db)
         return resp
     } catch (err) {
@@ -314,11 +326,28 @@ const list_season_for_admin = async data => {
     }
 }
 
+const terminate_season = async data => {
+    try {
+        const { season_id, user } = data
+        const id = season_id
+        const condition = { status: 'TERMINATED' }
+        const szn = await execute_query('get_item_by_condition', { where: { whereand: { holder_id: user.user_id, season_id } } }, 'season', db)
+        if (!szn || szn.length === 0) throw new Error('season not found')
+        const resp = await execute_query('update_item_by_id', { condition, id }, 'season', db)
+        return resp
+    } catch (err) {
+        return err
+    }
+}
+
 module.exports = {
     find_season,
     add_season_by_admin,
     add_season_with_invoice,
     renew_season_with_invoice,
+    list_all_season,
     list_season,
-    list_season_for_admin
+    list_season_for_admin,
+    terminate_season
 }
+

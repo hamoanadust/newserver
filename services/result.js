@@ -1,7 +1,7 @@
 module.exports = {
     result: (req, res) => {
         if (!req.data) {
-            throw new Error('No patch for path')
+            throw new Error('No match for path')
         } else if (req.data instanceof Error) {
             throw (req.data)
         } else {
