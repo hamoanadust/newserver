@@ -45,7 +45,7 @@ const prepare_season_invoice_data_for_renew = async data => {
         if (!carpark || carpark.length === 0) throw new Error('no carpark')
         else if (!season_rate || season_rate.length === 0) throw new Error('no season rate')
         else if (!system_config) throw new Error('no system config')
-        const { holder_id, holder_name, holder_company, holder_address, holder_email, holder_contact_number } = szn
+        const { holder_id, holder_name, holder_company, holder_address, holder_email, holder_contact_number, holder_type } = szn
         const { carpark_id, carpark_name, carpark_address } = carpark[0]
         attn = attn || 'system'
         invoice_date = invoice_date || moment().format('YYYY-MM-DD')
@@ -281,7 +281,7 @@ const add_season_with_invoice = async data => {
     }
 }
 
-const add_season = async data => {
+const add_season_by_admin = async data => {
     try {
         const {season_data} = await prepare_season_invoice_data(data)
         await execute_query('create_item', season_data, 'season', db)
@@ -316,7 +316,7 @@ const list_season_for_admin = async data => {
 
 module.exports = {
     find_season,
-    add_season,
+    add_season_by_admin,
     add_season_with_invoice,
     renew_season_with_invoice,
     list_season,

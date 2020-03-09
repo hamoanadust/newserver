@@ -23,10 +23,14 @@ carpark_router.route('/list_carpark')
 
 carpark_router.route('/list_all_carpark')
 .get(async (req, res, next) => {
-    const resp = await carpark.list_all_carpark();
-    res.json(resp);
-});
+    try {
+        req.data = await carpark.list_all_carpark()
+        next()
+    } catch (err) {
+        throw err
+    }
+})
 
 module.exports = {
     carpark_router
-};
+}

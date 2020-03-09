@@ -28,10 +28,9 @@ vehicle_router.route('/add_vehicle')
 })
 
 vehicle_router.route('/list_vehicle')
-.post(verify_user, async (req, res, next) => {
+.get(verify_user, async (req, res, next) => {
     try {
-        req.body.data = { user: req.user }
-        req.data = await vehicle.list_vehicle(req.body.data)
+        req.data = await vehicle.list_vehicle({ user: req.user })
         next()
     } catch (err) {
         throw err

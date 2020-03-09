@@ -41,9 +41,6 @@ app.use('/invoice', invoice_router)
 app.use('/season', season_router)
 app.use('/user', user_router)
 app.use('/vehicle', vehicle_router)
-app.get('*', (req, res) => {
-  throw(new Error(`cannot find path ${req.path}`))
-})
 app.use(result)
 app.use(errors)
 
