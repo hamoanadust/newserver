@@ -25,35 +25,122 @@ const find_season = async data => {
     }
 }
 
-const prepare_season_invoice_data_for_renew = data => {
+const prepare_season_invoice_data_for_renew = async data => {
     try {
-        let { season_id, end_date, attn, invoice_number, invoice_date, user } = data
+        let { season_id, end_date, attn, invoice_number, invoice_date } = data
         if (!season_id) throw new Error('no season id')
-        else if (!end_date) throw new Error('no end date')
+        else if (!end_date) throw new Error('no renew end date')
+        else if (!moment(end_date).isValid()) throw new Error('renew end date is not valid')
+        else if (moment(end_date).isBefore(moment())) throw new Error('renew end date is in the past')
         const szn = await execute_query('get_item_by_condition', { where: { season_id } }, 'season', db)
         if (!szn || szn.length === 0) throw new Error('no season')
-        else if (moment(szn[0].end_date).isAfter(moment(end_date))) throw new Error('renew end date is before previous end date')
-        const [carpark, season_rate] = await Promise.all([
+        else if (moment(end_date).format('DD/MM/YYYY') !== moment(end_date).endOf('month').format('DD/MM/YYYY')) throw new Error('renew end date must be end of a month')
+        else if (moment(end_date).format('DD/MM/YYYY') === moment(szn[0].end_date).endOf('month').format('DD/MM/YYYY')) throw new Error('renew end date cannot be the same with previous end date')
+        else if (moment(end_date).isBefore(moment(szn[0].end_date))) throw new Error('renew end date is before previous end date')
+        const [carpark, season_rate, system_config] = await Promise.all([
             execute_query('get_item_by_condition', {where: {carpark_id: szn[0].carpark_id}}, 'carpark', db),
-            execute_query('get_item_by_condition', {where: {whereand: {carpark_id: szn[0].carpark_id, vehicle_type: szn[0].vehicle_type, client_type: szn[0].holder_type, status: 'ACTIVE'}}, limit: 1}, 'season_rate', db)
+            execute_query('get_item_by_condition', {where: {whereand: {carpark_id: szn[0].carpark_id, vehicle_type: szn[0].vehicle_type, client_type: szn[0].holder_type, status: 'ACTIVE'}}, limit: 1}, 'season_rate', db),
+            execute_query('get_item_by_condition', {where: {type: 'COMPANY_INFO'}}, 'system_config', db)
         ])
         if (!carpark || carpark.length === 0) throw new Error('no carpark')
-        if (!season_rate || season_rate.length === 0) throw new Error('no season rate')
+        else if (!season_rate || season_rate.length === 0) throw new Error('no season rate')
+        else if (!system_config) throw new Error('no system config')
+        const { holder_id, holder_name, holder_company, holder_address, holder_email, holder_contact_number } = szn
         const { carpark_id, carpark_name, carpark_address } = carpark[0]
         attn = attn || 'system'
         invoice_date = invoice_date || moment().format('YYYY-MM-DD')
         const rate = season_rate[0].rate
         const months = moment(end_date).diff(moment(szn[0].end_date), 'month')
         const invoice_amount = months * rate
-
-        const season_data = { end_date }
-        const invoice_data = {invoice_number, invoice_date, invoice_type: 'RENEW', invoice_amount, attn, carpark_id, carpark_name, carpark_address, 
+        const supplier_name = system_config.find(e => e.config_key === 'name') ? system_config.find(e => e.config_key === 'name').config_value : ''
+        const supplier_address = system_config.find(e => e.config_key === 'address') ? system_config.find(e => e.config_key === 'address').config_value : ''
+        const supplier_email = system_config.find(e => e.config_key === 'email') ? system_config.find(e => e.config_key === 'email').config_value : ''
+        const supplier_contact_number = system_config.find(e => e.config_key === 'contact_number') ? system_config.find(e => e.config_key === 'contact_number').config_value : ''
+        const supplier_fax = system_config.find(e => e.config_key === 'fax') ? system_config.find(e => e.config_key === 'fax').config_value : ''
+        const supplier_uen = system_config.find(e => e.config_key === 'uen') ? system_config.find(e => e.config_key === 'uen').config_value : ''
+        const supplier_rcb = system_config.find(e => e.config_key === 'rcb') ? system_config.find(e => e.config_key === 'rcb').config_value : ''
+        
+        const season_data = { season_id, end_date }
+        const invoice_data = { invoice_number, invoice_date, invoice_type: 'RENEW', invoice_amount, attn, carpark_id, carpark_name, carpark_address, 
         buyer_id: holder_id, buyer_name: holder_name, buyer_company: holder_company, buyer_address: holder_address, buyer_email: holder_email, buyer_contact_number: holder_contact_number, 
         supplier_name, supplier_address, supplier_email, supplier_contact_number, supplier_fax, supplier_uen, supplier_rcb,
-        status: 'OUTSTANDING', created_at: moment().format('YYYY-MM-DD HH:mm:ss'), updated_at: moment().format('YYYY-MM-DD HH:mm:ss'), created_by: 'system', updated_by: 'system', months}
-    
+        status: 'OUTSTANDING', created_at: moment().format('YYYY-MM-DD HH:mm:ss'), updated_at: moment().format('YYYY-MM-DD HH:mm:ss'), created_by: 'system', updated_by: 'system', months }
+        return { season_data, invoice_data }
     } catch (err) {
         throw err
+    }
+}
+
+const renew_season_with_invoice = async data => {
+    try {
+        let { season_data, invoice_data } = await prepare_season_invoice_data_for_renew(data)
+        const { season_id, end_date } = season_data
+        console.log(season_data)
+        console.log(invoice_data)
+        const months = invoice_data.months
+        delete invoice_data.months
+        //to achieve transaction, use pool to get a connection
+        return new Promise((resolve, reject) => {
+            db.pool.getConnection((conn_err, connection) => {
+                if (conn_err) {
+                    reject(conn_err)
+                } else {
+                    connection.beginTransaction(trans_err => {
+                        if (trans_err) {
+                            reject(trans_err)
+                        } else {//create season with season_data
+                            connection.query('update season set ? where season_id = ?', [{ end_date, updated_at: moment().format('YYYY-MM-DD HH:mm:ss'), updated_by: 'system' }, season_id], (season_err, season_updated, fields) => {
+                                if (season_err) {
+                                    reject(season_err)
+                                } else {//create invoice with invoice_data
+                                    connection.query('insert into invoice set ?', invoice_data, (invoice_err, invoice_created, fields) => {
+                                        if (invoice_err) {
+                                            console.log('invoice err')
+                                            reject(invoice_err)
+                                        } else {
+                                            //invoice_item data ready, create invoice item
+                                            const invoice_item = { invoice_id: invoice_created.insertId, season_id, unit_price: invoice_data.invoice_amount, quantity: months, amount: invoice_data.invoice_amount, description:`Renew season for ${months} months` }
+                                            connection.query('insert into invoice_item set ?', invoice_item, (item_err, item_created, field) => {
+                                                if (item_err) {
+                                                    reject(item_err)
+                                                } else if (invoice_data.invoice_number) {//if invoice_number provided, use it
+                                                    //transaction commit
+                                                    connection.commit(err => {
+                                                        if (err) {
+                                                            reject(err)
+                                                        } else {
+                                                            resolve({season_data, invoice_data, invoice_item})
+                                                        }
+                                                    })
+                                                } else {
+                                                    //if invoice_number not provided, generate it with invoice_id and current year
+                                                    const invoice_number = `INV/${fill_zero(invoice_created.insertId)}/${moment().year()}`
+                                                    connection.query('update invoice set invoice_number = ?', invoice_number, (item_err, item_created, field) => {
+                                                        if (item_err) {
+                                                            reject(item_err)
+                                                        } else {//transaction commit
+                                                            connection.commit(err => {
+                                                                if (err) {
+                                                                    reject(err)
+                                                                } else {
+                                                                    resolve({season_data, invoice_data: {...invoice_data, invoice_number}, invoice_item})
+                                                                }
+                                                            })
+                                                        }
+                                                    })
+                                                }
+                                            })
+                                        }
+                                    })
+                                }
+                            })
+                        }
+                    })
+                }
+            })
+        }).catch(err => { return err })
+    } catch (err) {
+        return err
     }
 }
 
@@ -63,7 +150,6 @@ const prepare_season_invoice_data = async data => {
             card_type, vehicle_type, holder_type, attn, invoice_number, invoice_date, vehicle_id, //optional wtth a default value
             vehicle_number, holder_id, holder_name, holder_company, holder_address, holder_contact_number, holder_email,//optional
             user } = data//from middleware
-        console.log('user', user)
         //validation
         if (!carpark_id) throw new Error('no carpark id')
         else if (!card_number) throw new Error('no card number')
@@ -123,17 +209,9 @@ const prepare_season_invoice_data = async data => {
     }
 }
 
-const renew_season_with_invoice = async data => {
-    try {
-
-    } catch (err) {
-        return err
-    }
-}
-
 const add_season_with_invoice = async data => {
     try {
-        let {season_data, invoice_data} = await prepare_season_invoice_data(data)
+        let { season_data, invoice_data } = await prepare_season_invoice_data(data)
         console.log(season_data)
         console.log(invoice_data)
         const months = invoice_data.months
@@ -158,7 +236,7 @@ const add_season_with_invoice = async data => {
                                             reject(invoice_err)
                                         } else {
                                             //invoice_item data ready, create invoice item
-                                            const invoice_item = { invoice_id: invoice_created.insertId, season_id: season_created.insertId, unit_price: invoice_data.invoice_amount, quantity: months, amount: invoice_data.invoice_amount, description:`new season ${months} months` }
+                                            const invoice_item = { invoice_id: invoice_created.insertId, season_id: season_created.insertId, unit_price: invoice_data.invoice_amount, quantity: months, amount: invoice_data.invoice_amount, description:`Purchase new season for ${months} months` }
                                             connection.query('insert into invoice_item set ?', invoice_item, (item_err, item_created, field) => {
                                                 if (item_err) {
                                                     reject(item_err)
