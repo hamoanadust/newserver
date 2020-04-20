@@ -12,10 +12,23 @@ const get_vehicle_by_condition = async data => {
     }
 }
 
+const list_all_vehicle = async data => {
+    try {
+        let { user } = data
+        const condition = {where: {user_id: user.user_id}}
+        const resp = await get_vehicle_by_condition({condition})
+        return resp
+    } catch (err) {
+        return err
+    }
+}
+
 const list_vehicle = async data => {
     try {
-        let { limit, offset, orderby, orderdirection, user } = data
-        const condition = {where: {user_id: user.user_id}, limit, offset, orderby, orderdirection}
+        let { whereand, limit, offset, orderby, orderdirection, user } = data
+        if (whereand) whereand.user_id = user.user_id
+        else whereand = { user_id: user.user_id }
+        const condition = {where: { whereand }, limit, offset, orderby, orderdirection};
         const resp = await get_vehicle_by_condition({condition})
         return resp
     } catch (err) {
@@ -76,6 +89,7 @@ const add_vehicle_for_admin = async data => {
 
 module.exports = {
     get_vehicle_by_condition,
+    list_all_vehicle,
     list_vehicle,
     list_vehicle_for_admin,
     add_vehicle,

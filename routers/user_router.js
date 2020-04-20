@@ -39,6 +39,7 @@ user_router.route('/change_password')
 
 user_router.route('/check_user_token')
 .post(verify_user, (req, res, next) => {
+    req.data = {}
     next()
 })
 

@@ -1,6 +1,7 @@
 const express = require('express')
 const carpark_router = express.Router()
 const carpark = require('../services/carpark')
+const { pass_user, verify_user, verify_admin } = require('../services/auth')
 
 carpark_router.route('/list_carpark')
 .post(async (req, res, next) => {
@@ -8,7 +9,8 @@ carpark_router.route('/list_carpark')
         req.data = await carpark.list_carpark(req.body.data)
         next()
     } catch (err) {
-        throw err
+        req.data = err
+        next()
     }
 })
 
@@ -18,7 +20,32 @@ carpark_router.route('/list_all_carpark')
         req.data = await carpark.list_all_carpark()
         next()
     } catch (err) {
-        throw err
+        req.data = err
+        next()
+    }
+})
+
+carpark_router.route('/add_carpark')
+.post(verify_admin, async (req, res, next) => {
+    try {
+        req.body.data.user = req.user
+        req.data = await carpark.add_carpark(req.body.data)
+        next()
+    } catch (err) {
+        req.data = err
+        next()
+    }
+})
+
+carpark_router.route('/modify_carpark')
+.post(verify_admin, async (req, res, next) => {
+    try {
+        req.body.data.user = req.user
+        req.data = await carpark.modify_carpark(req.body.data)
+        next()
+    } catch (err) {
+        req.data = err
+        next()
     }
 })
 

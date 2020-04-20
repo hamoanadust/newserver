@@ -27,10 +27,23 @@ const find_invoice = async data => {
     }
 }
 
+const list_all_invoice = async data => {
+    try {
+        let { user } = data
+        const condition = {where: {user_id: user.user_id}}
+        const resp = await execute_query('get_item_by_condition', condition, 'invoice', db)
+        return resp
+    } catch (err) {
+        return err
+    }
+}
+
 const list_invoice = async data => {
     try {
-        let { limit, offset, orderby, orderdirection, user } = data;
-        const condition = {where: {buyer_id: user.user_id}, limit, offset, orderby, orderdirection};
+        let { whereand, limit, offset, orderby, orderdirection, user } = data;
+        if (whereand) whereand.buyer_id = user.user_id
+        else whereand = { buyer_id: user.user_id }
+        const condition = {where: { whereand }, limit, offset, orderby, orderdirection};
         const resp = await execute_query('get_item_by_condition', condition, 'invoice', db);
         return resp;
     } catch (err) {
@@ -154,6 +167,7 @@ const create_invoice = async data => {
 
 module.exports = {
     find_invoice,
+    list_all_invoice,
     list_invoice,
     list_invoice_for_admin,
     create_invoice,
