@@ -6,8 +6,7 @@ const { pass_user, verify_user, verify_admin } = require('../services/auth')
 request_router.route('/list_all_request')
 .get(verify_user, async (req, res, next) => {
     try {
-        req.body.data.user = req.user
-        req.data = await request.list_all_request(req.body.data)
+        req.data = await request.list_all_request({ user: req.user })
         next()
     } catch (err) {
         req.data = err

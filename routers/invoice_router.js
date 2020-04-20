@@ -21,7 +21,7 @@ invoice_router.route('/find_invoice')
 invoice_router.route('/list_all_invoice')
 .get(verify_user, async (req, res, next) => {
     try {
-        req.data = await invoice.list_invoice({ user: req.user })
+        req.data = await invoice.list_all_invoice({ user: req.user })
         next()
     } catch (err) {
         throw err
