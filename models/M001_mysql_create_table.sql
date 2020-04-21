@@ -165,6 +165,18 @@ updated_by varchar(35),
 CONSTRAINT request_id_pk PRIMARY KEY(request_id)
 );
 
+CREATE TABLE IF NOT EXISTS otp (
+    otp_id SERIAL NOT NULL,
+    user_id int,
+    value varchar(6),
+    contact_number varchar(20),
+    email varchar(100),
+    otp_type enum('SIGNUP', 'SIGNIN', 'TRANSACTION'),
+    status enum('NEW', '1-TIME-WRONG', '2-TIME-WRONG', 'LOCK', 'VALID', 'EXPIRED'),
+    updated_at datetime,
+    CONSTRAINT otp_id_pk PRIMARY KEY(otp_id)
+);
+
 insert into iu_type (initial_number, vehicle_type) values
 ('{001, 002, 003, 004}', 'FREE'),
 ('{071, 072, 073, 074, 075, 076, 077}', 'MOTORCYCLE'),

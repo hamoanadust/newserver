@@ -43,6 +43,16 @@ user_router.route('/check_user_token')
     next()
 })
 
+user_router.route('/create_signup_otp')
+.post(async (req, res, next) => {
+    try {
+        req.data = await user.create_signup_otp(req.body.data)
+        next()
+    } catch (err) {
+        throw err
+    }
+})
+
 // user_router.route('/get_access_control')
 // .post(verify_user, async (req, res, next) => {
 //     let data = { ...req.body.data, user: req.user }

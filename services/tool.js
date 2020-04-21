@@ -83,8 +83,8 @@ const value_unit = (value, unit) => {
 	return value > 1 ? `${value} ${unit}s` : `${value} ${unit}`;
 }
 
-const generate_random_integer = integer => {
-	return Math.floor(Math.random() * Math.floor(integer));
+const generate_random_integer = () => {
+	return Math.floor(100000 + Math.random() * 900000)
 }
 
 const return_type = value => {

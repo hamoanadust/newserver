@@ -3,11 +3,37 @@ const moment = require('moment')
 const { execute_query } = require('./dao')
 const { hash, compare } = require('./encrypt')
 const auth = require('./auth')
-const { success_res, fail_res } = require('./tool')
+const { generate_random_integer } = require('./tool')
+
+const create_signup_otp = async data => {
+    const { contact_number } = data
+    const value = generate_random_integer()
+    await execute_query('create_item', { value, contact_number, otp_type: 'SIGNUP', status: 'NEW', updated_at: moment().format('YYYY-MM-DD HH:mm:ss') }, 'otp', db)
+    return value
+}
+
+const check_otp = async data => {
+    const { otp, contact_number } = data
+    const otp_data = await execute_query('get_item_by_condition', { where: { contact_number }, limit: 1, orderby: 'otp_id' }, 'otp', db)
+    if (!otp_data || otp_data.length === 0) return { success: false, message: 'otp not exist' }
+    else if (otp_data[0].status === 'EXPIRED') return { success: false, message: 'otp expired' }
+    else if (otp_data[0].status === 'LOCK') return { success: false, message: '3 times wrong, otp expired' }
+    else if (otp_data[0].value !== otp) {
+        const status = otp_data[0].status === ('NEW' || 'VALID') ? '1-TIME-WRONG' : otp_data[0].status === '1-TIME-WRONG' ? '2-TIME-WRONG' : 'LOCK'
+        const message = `otp incorrect, ${status === '1-TIME-WRONG' ? '2 times left' : status === '2-TIME-WRONG' ? '1 time left' : '3 times wrong, otp expired'}`
+        await execute_query('update_item_by_id', { id: otp_data[0].otp_id, condition: { status } }, 'otp', db)
+        return { success: false, message }
+    } else {
+        await execute_query('update_item_by_id', { id: otp_data[0].otp_id, condition: { status: 'VALID' } }, 'otp', db)
+        return { success: true, message: 'otp valid' }
+    }
+}
 
 const signup = async data => {
     try {
-        const { username, password, company, contact_number } = data
+        const { username, password, company, contact_number, otp } = data
+        const check = await check_otp({ otp, contact_number })
+        if (!check.success) throw new Error(check.message)
         if (!username) throw new Error('no username')
         else if (!password) throw new Error('no password')
         const hashed = await hash(password)
@@ -68,5 +94,6 @@ const change_password = async data => {
 module.exports = {
     signup,
     signin,
-    change_password
+    change_password,
+    create_signup_otp
 }
