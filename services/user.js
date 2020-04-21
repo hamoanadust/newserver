@@ -7,7 +7,7 @@ const { success_res, fail_res } = require('./tool')
 
 const signup = async data => {
     try {
-        const { username, password, name, company, email, contact_number } = data
+        const { username, password, company, contact_number } = data
         if (!username) throw new Error('no username')
         else if (!password) throw new Error('no password')
         const hashed = await hash(password)
@@ -15,9 +15,9 @@ const signup = async data => {
         if (exist.length > 0) {
             throw new Error('username already existed')
         } else {
-            const user = { username, password: hashed, role: 'client', name, company, email, contact_number, created_at: moment().format('YYYY-MM-DD HH:mm:ss'), created_by: 'system' }
+            const user = { username, password: hashed, role: 'client', company, contact_number, created_at: moment().format('YYYY-MM-DD HH:mm:ss'), created_by: 'system' }
             await execute_query('create_item', user, 'user', db)
-            return {}
+            return { username, company, contact_number }
         }
     } catch (err) {
         return err
