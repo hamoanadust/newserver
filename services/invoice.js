@@ -30,7 +30,7 @@ const find_invoice = async data => {
 const list_all_invoice = async data => {
     try {
         let { user } = data
-        const condition = {where: {user_id: user.user_id}}
+        const condition = {where: {buyer_id: user.user_id}}
         const resp = await execute_query('get_item_by_condition', condition, 'invoice', db)
         return resp
     } catch (err) {
