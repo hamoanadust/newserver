@@ -146,7 +146,7 @@ const renew_season_with_invoice = async data => {
 const prepare_season_invoice_data = async data => {
     try {
         let { carpark_id, card_number, start_date, end_date, //required
-            card_type, vehicle_type, holder_type, attn, invoice_number, invoice_date, vehicle_id, //optional wtth a default value
+            card_type, vehicle_type, holder_type, attn, invoice_number, invoice_date, vehicle_id, //optional with a default value
             vehicle_number, holder_id, holder_name, holder_company, holder_address, holder_contact_number, holder_email,//optional
             user } = data//from middleware
         //validation
@@ -197,7 +197,7 @@ const prepare_season_invoice_data = async data => {
         const months = moment(end_date).diff(moment(start_date), 'month')
         const invoice_amount = months * rate
         //season and invoice data ready
-        const season_data = { carpark_id, card_number, start_date, end_date, card_type, vehicle_type, holder_type, vehicle_id, vehicle_number, holder_id, holder_name, holder_company, holder_address, holder_contact_number, holder_email }
+        const season_data = { carpark_id, card_number, start_date, end_date, card_type, vehicle_type, holder_type, vehicle_number, holder_id, holder_name, holder_company, holder_address, holder_contact_number, holder_email }
         const invoice_data = {invoice_number, invoice_date, invoice_type: 'NEW', invoice_amount, attn, carpark_id, carpark_name, carpark_address, 
             buyer_id: holder_id, buyer_name: holder_name, buyer_company: holder_company, buyer_address: holder_address, buyer_email: holder_email, buyer_contact_number: holder_contact_number, 
             supplier_name, supplier_address, supplier_email, supplier_contact_number, supplier_fax, supplier_uen, supplier_rcb,

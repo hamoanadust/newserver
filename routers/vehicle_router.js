@@ -34,6 +34,17 @@ vehicle_router.route('/list_vehicle')
     }
 })
 
+vehicle_router.route('/remove_vehicle')
+.post(verify_user, async (req, res, next) => {
+    try {
+        req.body.data.user = req.user
+        req.data = await vehicle.remove_vehicle(req.body.data)
+        next()
+    } catch (err) {
+        throw err
+    }
+})
+
 vehicle_router.route('/list_vehicle_for_admin')
 .post(verify_admin, async (req, res, next) => {
     try {

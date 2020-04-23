@@ -57,7 +57,6 @@ card_number varchar(16) not null,
 start_date date,
 end_date date,
 status ENUM('NEW', 'ACTIVE', 'TERMINATED', 'INACTIVE', 'PENDING', 'CANCELLED', 'EXPIRED') not null default 'ACTIVE',
-vehicle_id int,
 vehicle_number varchar(10),
 vehicle_type enum('CAR', 'MOTOR', 'LORRY'),
 holder_id int,
@@ -123,6 +122,7 @@ user_id int,
 vehicle_number varchar(20) not null,
 card_type enum('IU', 'CASHCARD'),
 card_number varchar(16),
+status enum('ACTIVE', 'DELETED') not null default 'ACTIVE',
 CONSTRAINT vehicle_id_pk PRIMARY KEY(vehicle_id)
 );
 
