@@ -59,11 +59,62 @@ const change_request_status_by_admin = async data => {
     }
 }
 
+const effect_request = async data => {
+    try {
+        const request = await get_request(data.request_id)
+        return choose_type(request)
+    } catch(err) {
+        return err
+    }
+}
+
+const get_request = request_id => {
+    return execute_query('get_item_by_condition', { where: { whereand: { request_id, status: ['PENDING', 'APPROVED'] } } }, 'request', db)
+}
+
+const choose_type = request => {
+    if (!request || request.length === 0) {
+        throw new Error('request not found')
+    } else if (Array.isArray(request) && request.length === 1) {
+        request = request[0]
+    }
+    return execute_request[request.request_type.toLowerCase()](request)
+}
+
+const change_vehicle = request => {
+    return request
+}
+
+const change_iu = request => {
+    return request
+}
+
+const change_cashcard = request => {
+    return request
+}
+
+const change_card_type = request => {
+    return request
+}
+
+const recurring_billing = request => {
+    return request
+}
+
+const terminate_season = request => {
+    return request
+}
+
+const execute_request = {
+    change_vehicle, change_iu, change_cashcard, change_card_type, recurring_billing, terminate_season
+}
+
 module.exports = {
     list_all_request,
     list_request,
     add_request,
     change_request_status,
-    change_request_status_by_admin
+    change_request_status_by_admin,
+    effect_request
 }
 

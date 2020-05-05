@@ -1,6 +1,6 @@
 const db = require('./db');
 const { success_res, fail_res, fill_zero } = require('./tool');
-const { execute_query, execute_query_transaction } = require('./dao');
+const { execute_query, prepare_where } = require('./dao');
 const moment = require('moment');
 const async = require("async");
 
@@ -30,8 +30,8 @@ const find_invoice = async data => {
 const list_all_invoice = async data => {
     try {
         let { user } = data
-        const condition = {where: {buyer_id: user.user_id}}
-        const resp = await execute_query('get_item_by_condition', condition, 'invoice', db)
+        const sql = `select inv.*, item.*, s.card_number, s.card_type, s.start_date, s.end_date, s.status as season_status, s.vehicle_number, s.vehicle_type from invoice inv left join invoice_item item using (invoice_id) left join season s on item.season_id = s.season_id where inv.buyer_id = ${user.user_id} and inv.status in ('OUTSTANDING', 'PAID')`
+        const resp = await db.query(sql)
         return resp
     } catch (err) {
         return err
@@ -40,11 +40,12 @@ const list_all_invoice = async data => {
 
 const list_invoice = async data => {
     try {
-        let { whereand, limit, offset, orderby, orderdirection, user } = data;
-        if (whereand) whereand.buyer_id = user.user_id
-        else whereand = { buyer_id: user.user_id }
-        const condition = {where: { whereand }, limit, offset, orderby, orderdirection};
-        const resp = await execute_query('get_item_by_condition', condition, 'invoice', db);
+        let { limit, offset, orderby, orderdirection, user } = data;
+        const order = orderby ? `order by ${orderby} ${orderdirection || 'desc'}` : '';
+        const limitation = limit === 'no' ? '' : `limit ${limit || '100'}`;
+        const offsetion = offset ? `offset ${offset}` : '';
+        const sql = `select inv.*, item.*, s.card_number, s.card_type, s.start_date, s.end_date, s.status as season_status, s.vehicle_number, s.vehicle_type from invoice inv left join invoice_item item using (invoice_id) left join season s on item.season_id = s.season_id where inv.buyer_id = ${user.user_id} and inv.status in ('OUTSTANDING', 'PAID') ${order} ${limitation} ${offsetion}`
+        const resp = await db.query(sql)
         return resp;
     } catch (err) {
         console.log('list_invoice err');
@@ -54,9 +55,12 @@ const list_invoice = async data => {
 
 const list_invoice_for_admin = async data => {
     try {
-        let { condition } = data;
-        if (!condition) condition = {where: {invoice_id: {gt: 0}}};
-        const resp = await execute_query('get_item_by_condition', condition, 'invoice', db);
+        let { where, limit, offset, orderby, orderdirection } = data;
+        const order = orderby ? `order by ${orderby} ${orderdirection || 'desc'}` : '';
+        const limitation = limit === 'no' ? '' : `limit ${limit || '100'}`;
+        const offsetion = offset ? `offset ${offset}` : '';
+        const sql = `select inv.*, item.*, s.card_number, s.card_type, s.start_date, s.end_date, s.status as season_status, s.vehicle_number, s.vehicle_type from invoice inv left join invoice_item item using (invoice_id) left join season s on item.season_id = s.season_id where ${prepare_where(where, db)} ${order} ${limitation} ${offsetion}`
+        const resp = await db.query(sql)
         return resp;
     } catch (err) {
         console.log('list_invoice err');

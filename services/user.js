@@ -59,8 +59,9 @@ const signin = async data => {
         } else {
             const check = await compare(password, exist[0].password)
             if (check) {
+                const { username, name, company, address, email, contact_number, phone_code, role } = exist[0]
                 const token = auth.get_token({user_id: exist[0].user_id})
-                return token
+                return { username, name, company, address, email, contact_number, phone_code, role, token }
             } else {
                 throw new Error('password incorrect')
             }

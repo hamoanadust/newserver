@@ -90,7 +90,8 @@ request_router.route('/effect_request')
 .post(verify_admin, async (req, res, next) => {
     try {
         req.body.data.user = req.user
-        req.data = await request.change_request_status_by_admin({ ...req.body.data, status: 'EFFECTIVE' })
+        req.data = await request.effect_request(req.body.data)
+        console.log('req data', req.data)
         next()
     } catch (err) {
         req.data = err

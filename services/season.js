@@ -340,6 +340,17 @@ const terminate_season = async data => {
     }
 }
 
+const create_multi_season = async data => {
+    try {
+        { carpark_id, card_number, start_date, end_date, //required
+            card_type, vehicle_type, holder_type, attn, invoice_number, invoice_date, vehicle_id, //optional with a default value
+            vehicle_number, holder_id, holder_name, holder_company, holder_address, holder_contact_number, holder_email,//optional
+            user }
+    } catch (err) {
+        return err
+    }
+}
+
 module.exports = {
     find_season,
     add_season_by_admin,
