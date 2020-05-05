@@ -84,6 +84,7 @@ const create_invoice = async data => {
         attn = attn || 'system';
         invoice_date = invoice_date || moment().format('YYYY-MM-DD');
         invoice_amount = invoice_item.reduce((t, e) => t + e.amount, 0);
+        const total_amount = invoice_amount*1.07;
         carpark_name = carpark_name || (carpark && carpark[0] ? carpark[0].carpark_name : '');
         carpark_address = carpark_address || (carpark && carpark[0] ? carpark[0].address : '');
         buyer_name = buyer_name || (buyer && buyer[0] ? buyer[0].name : '');
@@ -99,7 +100,7 @@ const create_invoice = async data => {
         const supplier_uen = system_config.find(e => e.config_key === 'uen') ? system_config.find(e => e.config_key === 'uen').config_value : '';
         const supplier_rcb = system_config.find(e => e.config_key === 'rcb') ? system_config.find(e => e.config_key === 'rcb').config_value : '';
         
-        const invoice_data = { invoice_number, invoice_date, invoice_type, attn, 
+        const invoice_data = { invoice_number, invoice_date, invoice_type, attn, invoice_amount, total_amount,
             carpark_id, carpark_name, carpark_address, 
             buyer_id, buyer_name, buyer_company, buyer_address, buyer_email, buyer_contact_number,
             supplier_name, supplier_address, supplier_email, supplier_contact_number, supplier_fax, supplier_uen, supplier_rcb,

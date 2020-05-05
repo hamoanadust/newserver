@@ -56,7 +56,7 @@ card_type ENUM('IU', 'CASHCARD') not null default 'IU',
 card_number varchar(16) not null,
 start_date date,
 end_date date,
-status ENUM('NEW', 'ACTIVE', 'TERMINATED', 'INACTIVE', 'PENDING', 'CANCELLED', 'EXPIRED') not null default 'ACTIVE',
+status ENUM('NEW', 'ACTIVE', 'TERMINATED', 'INACTIVE', 'PENDING', 'CANCELLED', 'EXPIRED') not null default 'NEW',
 vehicle_number varchar(10),
 vehicle_type enum('CAR', 'MOTOR', 'LORRY'),
 holder_id int,
@@ -80,6 +80,7 @@ invoice_date datetime,
 payment_terms int,
 invoice_type enum('NEW', 'RENEW'),
 invoice_amount float(18,2),
+total_amount float(18,2),
 attn varchar(20),
 carpark_id int,
 carpark_name varchar(200),
@@ -168,6 +169,19 @@ CONSTRAINT request_id_pk PRIMARY KEY(request_id)
 CREATE TABLE IF NOT EXISTS otp (
     otp_id SERIAL NOT NULL,
     user_id int,
+    value varchar(6),
+    contact_number varchar(20),
+    email varchar(100),
+    otp_type enum('SIGNUP', 'SIGNIN', 'TRANSACTION'),
+    status enum('NEW', '1-TIME-WRONG', '2-TIME-WRONG', 'LOCK', 'VALID', 'EXPIRED'),
+    updated_at datetime,
+    CONSTRAINT otp_id_pk PRIMARY KEY(otp_id)
+);
+
+
+CREATE TABLE IF NOT EXISTS transaction (
+    transaction_id SERIAL NOT NULL,
+    invoice_id int,
     value varchar(6),
     contact_number varchar(20),
     email varchar(100),

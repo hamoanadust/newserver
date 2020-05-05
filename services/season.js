@@ -51,6 +51,7 @@ const prepare_season_invoice_data_for_renew = async data => {
         const rate = season_rate[0].rate
         const months = moment(end_date).diff(moment(szn[0].end_date), 'month')
         const invoice_amount = months * rate
+        const total_amount = invoice_amount * 1.07
         const supplier_name = system_config.find(e => e.config_key === 'name') ? system_config.find(e => e.config_key === 'name').config_value : ''
         const supplier_address = system_config.find(e => e.config_key === 'address') ? system_config.find(e => e.config_key === 'address').config_value : ''
         const supplier_email = system_config.find(e => e.config_key === 'email') ? system_config.find(e => e.config_key === 'email').config_value : ''
@@ -60,7 +61,7 @@ const prepare_season_invoice_data_for_renew = async data => {
         const supplier_rcb = system_config.find(e => e.config_key === 'rcb') ? system_config.find(e => e.config_key === 'rcb').config_value : ''
         
         const season_data = { season_id, end_date }
-        const invoice_data = { invoice_number, invoice_date, invoice_type: 'RENEW', invoice_amount, attn, carpark_id, carpark_name, carpark_address, 
+        const invoice_data = { invoice_number, invoice_date, invoice_type: 'RENEW', invoice_amount, total_amount, attn, carpark_id, carpark_name, carpark_address, 
         buyer_id: holder_id, buyer_name: holder_name, buyer_company: holder_company, buyer_address: holder_address, buyer_email: holder_email, buyer_contact_number: holder_contact_number, 
         supplier_name, supplier_address, supplier_email, supplier_contact_number, supplier_fax, supplier_uen, supplier_rcb,
         status: 'OUTSTANDING', created_at: moment().format('YYYY-MM-DD HH:mm:ss'), updated_at: moment().format('YYYY-MM-DD HH:mm:ss'), created_by: 'system', updated_by: 'system', months }
@@ -196,9 +197,10 @@ const prepare_season_invoice_data = async data => {
         const rate = season_rate[0].rate
         const months = moment(end_date).diff(moment(start_date), 'month')
         const invoice_amount = months * rate
+        const total_amount = invoice_amount * 1.07
         //season and invoice data ready
         const season_data = { carpark_id, card_number, start_date, end_date, card_type, vehicle_type, holder_type, vehicle_number, holder_id, holder_name, holder_company, holder_address, holder_contact_number, holder_email }
-        const invoice_data = {invoice_number, invoice_date, invoice_type: 'NEW', invoice_amount, attn, carpark_id, carpark_name, carpark_address, 
+        const invoice_data = {invoice_number, invoice_date, invoice_type: 'NEW', invoice_amount, total_amount, attn, carpark_id, carpark_name, carpark_address, 
             buyer_id: holder_id, buyer_name: holder_name, buyer_company: holder_company, buyer_address: holder_address, buyer_email: holder_email, buyer_contact_number: holder_contact_number, 
             supplier_name, supplier_address, supplier_email, supplier_contact_number, supplier_fax, supplier_uen, supplier_rcb,
             status: 'OUTSTANDING', created_at: moment().format('YYYY-MM-DD HH:mm:ss'), updated_at: moment().format('YYYY-MM-DD HH:mm:ss'), created_by: 'system', updated_by: 'system', months}
