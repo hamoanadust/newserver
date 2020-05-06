@@ -182,13 +182,10 @@ CREATE TABLE IF NOT EXISTS otp (
 CREATE TABLE IF NOT EXISTS transaction (
     transaction_id SERIAL NOT NULL,
     invoice_id int,
-    value varchar(6),
-    contact_number varchar(20),
-    email varchar(100),
-    otp_type enum('SIGNUP', 'SIGNIN', 'TRANSACTION'),
-    status enum('NEW', '1-TIME-WRONG', '2-TIME-WRONG', 'LOCK', 'VALID', 'EXPIRED'),
-    updated_at datetime,
-    CONSTRAINT otp_id_pk PRIMARY KEY(otp_id)
+    amount float(18,2),
+    transaction_time datetime,
+    status enum('SUCCESS', 'FAIL'),
+    CONSTRAINT transaction_id_pk PRIMARY KEY(transaction_id)
 );
 
 insert into iu_type (initial_number, vehicle_type) values

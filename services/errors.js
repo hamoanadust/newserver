@@ -3,7 +3,7 @@ module.exports = {
         if (!err) return
         console.log(err)
         let { statusCode, message } = err
-        statusCode = statusCode || 404
+        statusCode = statusCode || 200
         const resp = {
             status: "error",
             statusCode,
