@@ -22,7 +22,7 @@ const generate_token = data => {
 
 const checkout = async data => {
     const { paymentMethodNonce, invoice_id } = data
-    console.log(data)
+    console.log('data', data)
     const invoice = await execute_query('get_item_by_condition', { where: { invoice_id } }, 'invoice', db)
     console.log(invoice)
     return invoice
