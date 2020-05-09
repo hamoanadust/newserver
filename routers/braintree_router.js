@@ -35,10 +35,8 @@ braintree_router.route('/generate_token')
 
 braintree_router.route('/checkout')
 .post(async (req, res, next) => {
-    console.log(req.body.data);
-    const resp = await bt.checkout(req.body.data)
-    console.log(resp)
-    res.json(resp)
+    req.data = await bt.checkout(req.body.data)
+    next()
 });
 
 braintree_router.route('/checkout_remember_customer')

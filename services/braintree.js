@@ -21,26 +21,33 @@ const generate_token = data => {
 }
 
 const checkout = async data => {
-    const { paymentMethodNonce, invoice_id } = data
-    console.log('data', data)
-    const invoice = await execute_query('get_item_by_condition', { where: { invoice_id } }, 'invoice', db)
-    console.log(invoice)
-    return invoice
-    // return new Promise((resolve, reject) => {
-    //     gateway.transaction.sale({
-    //         amount,
-    //         paymentMethodNonce,
-    //         options: {
-    //             // submitForSettlement: true
-    //         }
-    //     }, (err, result) => {
-    //         if (err) {
-    //             return reject(err);
-    //         }
-    //         console.log(result);
-    //         resolve(result);
-    //     });
-    // });
+    try {
+        const { paymentMethodNonce, invoice_id } = data
+        console.log('data', data)
+        const invoice = await execute_query('get_item_by_condition', { where: { invoice_id } }, 'invoice', db)
+        console.log(invoice)
+        const amount = invoice.reduce((r, e) => r + e.total_amount, 0)
+        
+        return amount
+        // return new Promise((resolve, reject) => {
+        //     gateway.transaction.sale({
+        //         amount,
+        //         paymentMethodNonce,
+        //         options: {
+        //             // submitForSettlement: true
+        //         }
+        //     }, (err, result) => {
+        //         if (err) {
+        //             return reject(err);
+        //         }
+        //         console.log(result);
+        //         resolve(result);
+        //     });
+        // });
+
+    } catch(err) {
+        return err
+    }
 }
 
 const create_customer = data => {
