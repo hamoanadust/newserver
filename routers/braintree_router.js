@@ -22,6 +22,13 @@ braintree_router.get('/create_checkout', async (req, res) => {
     });
 });
 
+braintree_router.get('/checkout_invoice', async (req, res) => {
+    const clientToken = await bt.generate_token({});
+    res.render('checkouts/checkout_invoice', {
+        clientToken
+    });
+});
+
 braintree_router.route('/test')
 .post((req, res, next) => {
     res.json(req.body);
@@ -37,7 +44,13 @@ braintree_router.route('/checkout')
 .post(async (req, res, next) => {
     req.data = await bt.checkout(req.body.data)
     next()
-});
+})
+
+braintree_router.route('/save_payment_method')
+.post(async (req, res, next) => {
+    req.data = await bt.checkout(req.body.data)
+    next()
+})
 
 braintree_router.route('/checkout_remember_customer')
 .post(async (req, res, next) => {

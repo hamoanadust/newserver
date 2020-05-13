@@ -13,11 +13,11 @@ const generate_token = data => {
     return new Promise((resolve, reject) => {
         gateway.clientToken.generate(data, (err, response) => {
             if (err) {
-                return reject(err);
+                return reject(err)
             }
-            resolve(response.clientToken);
-        });
-    });
+            resolve(response.clientToken)
+        })
+    })
 }
 
 const checkout = async data => {
