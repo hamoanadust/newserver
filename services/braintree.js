@@ -50,12 +50,12 @@ const checkout = async data => {
 }
 
 const sale = data => {
-    const { amount, paymentMethodNonce, token } = data
+    const { amount, paymentMethodNonce, paymentMethodToken } = data
     // if (token) paymentMethodNonce = undefined
     return new Promise((resolve, reject) => {
         gateway.transaction.sale({
             amount,
-            token,
+            paymentMethodToken,
             paymentMethodNonce,
             options: {
                 submitForSettlement: true
@@ -84,10 +84,10 @@ const checkout_invoice = async data => {
         } else {
             const payment_methods = await execute_query('get_item_by_condition', { where: { whereand: { customer_id: user.customer_id } } }, 'payment_method', db)
             
-            payment.token = payment_methods.length === 0 ? undefined : payment_methods.find(e => e.is_default) ? payment_methods.find(e => e.is_default).token : payment_methods[0].token
-            console.log('pay by token', payment.token)
+            payment.paymentMethodToken = payment_methods.length === 0 ? undefined : payment_methods.find(e => e.is_default) ? payment_methods.find(e => e.is_default).token : payment_methods[0].token
+            console.log('pay by token', payment.paymentMethodToken)
         }
-        if (!paymentMethodNonce && !payment.token) throw new Error('no payment method is provided')
+        if (!paymentMethodNonce && !payment.paymentMethodToken) throw new Error('no payment method is provided')
         const resp = await sale(payment)
         if (resp.success) {
             console.log(resp)
