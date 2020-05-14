@@ -82,9 +82,9 @@ const checkout_invoice = async data => {
             payment.paymentMethodNonce = paymentMethodNonce
             console.log('pay by nonce', paymentMethodNonce)
         } else {
-            const tokens = await execute_query('get_item_by_condition', { where: { whereand: { customer_id: user.customer_id } } }, 'payment_method', db)
-            console.log(tokens)
-            payment.token = tokens.length === 1 ? tokens[0] : tokens.find(e => e.is_default)
+            const payment_methods = await execute_query('get_item_by_condition', { where: { whereand: { customer_id: user.customer_id } } }, 'payment_method', db)
+            
+            payment.token = payment_methods.length === 0 ? undefined : payment_methods.find(e => e.is_default) ? payment_methods.find(e => e.is_default).token : payment_methods[0].token
             console.log('pay by token', payment.token)
         }
         if (!paymentMethodNonce && !payment.token) throw new Error('no payment method is provided')
