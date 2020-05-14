@@ -2,7 +2,7 @@ const db = require('./db');
 const { execute_query } = require('./dao');
 const { success_res, fail_res } = require('./tool');
 const braintree = require("braintree");
-const { braintree_config } = require('../config/config.json');
+const { braintree_config, merchantAccountId } = require('../config/config.json');
 
 const gateway = braintree.connect({
     ...braintree_config,
@@ -43,6 +43,41 @@ const checkout = async data => {
             });
         });
 
+    } catch(err) {
+        return err
+    }
+}
+
+const sale = (paymentMethodNonce, amount) => {
+    return new Promise((resolve, reject) => {
+        gateway.transaction.sale({
+            amount,
+            paymentMethodNonce,
+            merchantAccountId,
+            options: {
+                submitForSettlement: true
+            }
+        }, (err, result) => {
+            if (err) {
+                return reject(err)
+            }
+            resolve(result)
+        })
+    })
+}
+
+const checkout_invoice = async data => {
+    try {
+        const { paymentMethodNonce, invoice_id } = data
+        console.log('data', data)
+        const invoice = await execute_query('get_item_by_condition', { where: { whereand: { invoice_id, status: 'OUTSTANDING' } } }, 'invoice', db)
+        if (!invoice || invoice.length === 0) throw new Error('No outstanding invoice is found')
+        else if (Array.isArray(invoice_id) && invoice_id.length !== invoice.length) throw new Error('Some of the outstanding invoices are not found')
+        console.log(invoice)
+        const amount = invoice.reduce((r, e) => r + e.total_amount, 0)
+        const resp = await sale(paymentMethodNonce, amount)
+        console.log(resp)
+        return resp
     } catch(err) {
         return err
     }
@@ -175,5 +210,6 @@ module.exports = {
     find_customer,
     find_payment_method,
     checkout_customer,
-    create_customer
+    create_customer,
+    checkout_invoice
 }

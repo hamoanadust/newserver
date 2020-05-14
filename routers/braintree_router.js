@@ -47,6 +47,13 @@ braintree_router.route('/checkout')
     next()
 })
 
+braintree_router.route('/checkout_invoice')
+.post(async (req, res, next) => {
+    console.log(req.body)
+    req.data = await bt.checkout_invoice(req.body.data)
+    next()
+})
+
 braintree_router.route('/save_payment_method')
 .post(async (req, res, next) => {
     req.data = await bt.checkout(req.body.data)

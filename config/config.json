@@ -43,6 +43,7 @@
         "customer_key": "TL23JBRCxtf8iCUzSKdM8KtLO2oa",
         "customer_secret": "n37f2q8MyX9zT_ZkxSXMzhMKUgQa",
         "access_token": "561c7f4581417fb5e50872039a2618ad"
-    }
+    },
+    "merchantAccountId": "nufindata"
 }
 
