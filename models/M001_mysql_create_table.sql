@@ -188,6 +188,24 @@ CREATE TABLE IF NOT EXISTS transaction (
     CONSTRAINT transaction_id_pk PRIMARY KEY(transaction_id)
 );
 
+
+
+CREATE TABLE IF NOT EXISTS payment_method (
+    payment_method_id SERIAL NOT NULL,
+    customer_id int,
+    cardType varchar(20),
+    maskedNumber varchar(30),
+    expirationDate varchar(10),
+    last4 varchar(4),
+    token varchar(10),
+    is_default boolean,
+    status enum('ACTIVE', 'INACTIVE'),
+    created_at datetime,
+    updated_at datetime,
+    CONSTRAINT payment_method_id_pk PRIMARY KEY(payment_method_id)
+);
+
+
 insert into iu_type (initial_number, vehicle_type) values
 ('{001, 002, 003, 004}', 'FREE'),
 ('{071, 072, 073, 074, 075, 076, 077}', 'MOTORCYCLE'),

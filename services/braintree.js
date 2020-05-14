@@ -111,8 +111,12 @@ const save_payment_method = data => {
                 const customer_id = result.customer.id
                 console.log(result.customer.paymentMethods)
                 const token = result.customer.paymentMethods.token
+                console.log(token)
                 try {
-                    await execute_query('update_item_by_id', { id: user.user_id, condition: { customer_id, token } }, 'user', db)
+                    await Promise.all([
+                        execute_query('update_item_by_id', { id: user.user_id, condition: { customer_id } }, 'user', db),
+                        create_payment_method({ ...result.customer.paymentMethods, customer_id })
+                    ])
                     resolve(success_res())
                 } catch(er) {
                     reject(er)
@@ -124,17 +128,10 @@ const save_payment_method = data => {
     })
 }
 
-const create_nonce = data => {
-    const { clientToken } = data;
-    return new Promise((resolve, reject) => {
-        gateway.paymentMethodNonce.create(clientToken, (err, response) => {
-            if (err) {
-                console.log(err);
-                return reject(err);
-            }
-            resolve(response.paymentMethodNonce.nonce);
-        });
-    });
+const create_payment_method = data => {
+    const { customer_id, token, cardType, maskedNumber, expirationDate, last4, is_default } = data
+    const item = { customer_id, token, cardType, maskedNumber, expirationDate, last4, is_default, created_at: moment().format('YYYY-MM-DD'), updated_at: moment().format('YYYY-MM-DD') }
+    return execute_query('create_item', item, 'payment_method', db)
 }
 
 const checkout_remember_customer = data => {
