@@ -49,10 +49,13 @@ const checkout = async data => {
     }
 }
 
-const sale = (paymentMethodNonce, amount) => {
+const sale = data => {
+    const { amount, paymentMethodNonce, token } = data
+    // if (token) paymentMethodNonce = undefined
     return new Promise((resolve, reject) => {
         gateway.transaction.sale({
             amount,
+            token,
             paymentMethodNonce,
             options: {
                 submitForSettlement: true
@@ -68,14 +71,24 @@ const sale = (paymentMethodNonce, amount) => {
 
 const checkout_invoice = async data => {
     try {
-        const { paymentMethodNonce, invoice_id } = data
+        const { paymentMethodNonce, invoice_id, user } = data
         console.log('data', data)
         const invoice = await execute_query('get_item_by_condition', { where: { whereand: { invoice_id, status: 'OUTSTANDING' } } }, 'invoice', db)
         if (!invoice || invoice.length === 0) throw new Error('No outstanding invoice is found')
         else if (Array.isArray(invoice_id) && invoice_id.length !== invoice.length) throw new Error('Some of the outstanding invoices are not found')
-        console.log(invoice)
         const amount = invoice.reduce((r, e) => r + e.total_amount, 0)
-        const resp = await sale(paymentMethodNonce, amount)
+        let payment = { amount }
+        if (paymentMethodNonce) {
+            payment.paymentMethodNonce = paymentMethodNonce
+            console.log('pay by nonce', paymentMethodNonce)
+        } else {
+            const sql = `select p.token from user u left join payment_method using (customer_id) where u.user_id = ${db.escape(user.user_id)}`
+            const tokens = await db.query(sql)
+            payment.token = tokens.find(e => e.is_default)
+            console.log('pay by token', payment.token)
+        }
+        if (!paymentMethodNonce && !payment.token) throw new Error('no payment method is provided')
+        const resp = await sale(payment)
         if (resp.success) {
             console.log(resp)
             const invoice_item = await execute_query('get_item_by_condition', { where: { invoice_id } }, 'invoice_item', db )
@@ -94,7 +107,7 @@ const checkout_invoice = async data => {
     }
 }
 
-const save_payment_method = data => {
+const create_customer = data => {
     let { paymentMethodNonce, user } = data
     return new Promise((resolve, reject) => {
         gateway.customer.create({
@@ -114,7 +127,7 @@ const save_payment_method = data => {
                 try {
                     await Promise.all([
                         execute_query('update_item_by_id', { id: user.user_id, condition: { customer_id } }, 'user', db),
-                        create_payment_method({ ...result.customer.paymentMethods[0], customer_id })
+                        create_payment_method({ ...result.customer.paymentMethods[0], customer_id, is_default: true })
                     ])
                     resolve(success_res())
                 } catch(er) {
@@ -216,6 +229,6 @@ module.exports = {
     // find_customer,
     // find_payment_method,
     // checkout_customer,
-    save_payment_method,
+    create_customer,
     checkout_invoice
 }

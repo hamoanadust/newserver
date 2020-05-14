@@ -52,7 +52,7 @@
                         }
                     }
                     console.log({ data: { paymentMethodNonce: payload.nonce, invoice_id: amount.value.split(',') } })
-                    xhr.send(JSON.stringify({ data: { paymentMethodNonce: payload.nonce, invoice_id: amount.value.split(',') } }));
+                    xhr.send(JSON.stringify({ data: { invoice_id: amount.value.split(',') } }));
                 });
             });
         }
