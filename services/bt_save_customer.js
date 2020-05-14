@@ -41,6 +41,7 @@
             console.log('Error', err);
             return;
           }
+          console.log(payload)
           const xhr = new XMLHttpRequest();
           xhr.open("POST", "http://biddit.sg:4000/bt/save_payment_method");
           xhr.setRequestHeader('Authorization', `Bearer ${token}`);
@@ -54,9 +55,9 @@
               // form.hidden = true;
             }
           }
-          xhr.send(JSON.stringify({paymentMethodNonce: payload.nonce}));
-        });
-      });
+          xhr.send(JSON.stringify({ data: { paymentMethodNonce: payload.nonce } }))
+        })
+      })
     }
   );
 })();
