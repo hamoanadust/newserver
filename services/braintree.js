@@ -3,6 +3,7 @@ const { execute_query } = require('./dao');
 const { success_res, fail_res } = require('./tool');
 const braintree = require("braintree");
 const { braintree_config } = require('../config/config.json');
+const moment = require('moment')
 
 const gateway = braintree.connect({
     ...braintree_config,
@@ -110,12 +111,10 @@ const save_payment_method = data => {
                 console.log(result);
                 const customer_id = result.customer.id
                 console.log(result.customer.paymentMethods)
-                const token = result.customer.paymentMethods.token
-                console.log(token)
                 try {
                     await Promise.all([
                         execute_query('update_item_by_id', { id: user.user_id, condition: { customer_id } }, 'user', db),
-                        create_payment_method({ ...result.customer.paymentMethods, customer_id })
+                        create_payment_method({ ...result.customer.paymentMethods[0], customer_id })
                     ])
                     resolve(success_res())
                 } catch(er) {
