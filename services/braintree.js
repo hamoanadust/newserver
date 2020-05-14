@@ -82,9 +82,9 @@ const checkout_invoice = async data => {
             payment.paymentMethodNonce = paymentMethodNonce
             console.log('pay by nonce', paymentMethodNonce)
         } else {
-            const sql = `select p.token from user u left join payment_method p using (customer_id) where u.user_id = ${db.escape(user.user_id)}`
+            const sql = `select p.token, p.is_default from user u left join payment_method p using (customer_id) where u.user_id = ${db.escape(user.user_id)}`
             const tokens = await db.query(sql)
-            payment.token = tokens.find(e => e.is_default)
+            payment.token = tokens.length === 1 ? tokens[0] : tokens.find(e => e.is_default)
             console.log('pay by token', payment.token)
         }
         if (!paymentMethodNonce && !payment.token) throw new Error('no payment method is provided')
