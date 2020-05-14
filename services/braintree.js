@@ -2,7 +2,7 @@ const db = require('./db');
 const { execute_query } = require('./dao');
 const { success_res, fail_res } = require('./tool');
 const braintree = require("braintree");
-const { braintree_config, merchantAccountId } = require('../config/config.json');
+const { braintree_config } = require('../config/config.json');
 
 const gateway = braintree.connect({
     ...braintree_config,
@@ -53,7 +53,6 @@ const sale = (paymentMethodNonce, amount) => {
         gateway.transaction.sale({
             amount,
             paymentMethodNonce,
-            merchantAccountId,
             options: {
                 submitForSettlement: true
             }
