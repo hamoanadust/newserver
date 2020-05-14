@@ -29,21 +29,10 @@ braintree_router.get('/checkout_invoice', async (req, res) => {
     });
 });
 
-braintree_router.route('/test')
-.post((req, res, next) => {
-    res.json(req.body);
-});
-
-braintree_router.route('/generate_token')
-.post(async (req, res, next) => {
-    const resp = await generate_token({});
-    res.json(resp);
-});
-
-braintree_router.route('/checkout')
-.post(async (req, res, next) => {
-    console.log(req.body)
-    req.data = await bt.checkout(req.body.data)
+braintree_router.route('/save_payment_method')
+.post(verify_user, async (req, res, next) => {
+    req.body.data.user = req.user
+    req.data = await bt.save_payment_method(req.body.data)
     next()
 })
 
@@ -54,46 +43,52 @@ braintree_router.route('/checkout_invoice')
     next()
 })
 
-braintree_router.route('/save_payment_method')
+braintree_router.route('/generate_token')
 .post(async (req, res, next) => {
-    req.data = await bt.checkout(req.body.data)
-    next()
+    const resp = await generate_token({})
+    res.json(resp)
 })
 
-braintree_router.route('/checkout_remember_customer')
-.post(async (req, res, next) => {
-    console.log(req.body);
-    const { paymentMethodNonce, amount } = req.body;
-    const resp = await bt.checkout_remember_customer({ paymentMethodNonce, amount });
-    console.log(resp);
-    res.json('success');
-});
+// braintree_router.route('/checkout')
+// .post(async (req, res, next) => {
+//     console.log(req.body)
+//     req.data = await bt.checkout(req.body.data)
+//     next()
+// })
 
-braintree_router.route('/find_customer')
-.post(async (req, res, next) => {
-    const resp = await bt.find_customer(req.body.data);
-    res.json(resp);
-});
+// braintree_router.route('/save_payment_method')
+// .post(async (req, res, next) => {
+//     req.data = await bt.checkout(req.body.data)
+//     next()
+// })
 
-braintree_router.route('/find_payment_method')
-.post(async (req, res, next) => {
-    const resp = await bt.find_payment_method(req.body.data);
-    res.json(resp);
-});
+// braintree_router.route('/checkout_remember_customer')
+// .post(async (req, res, next) => {
+//     console.log(req.body);
+//     const { paymentMethodNonce, amount } = req.body;
+//     const resp = await bt.checkout_remember_customer({ paymentMethodNonce, amount });
+//     console.log(resp);
+//     res.json('success');
+// });
+
+// braintree_router.route('/find_customer')
+// .post(async (req, res, next) => {
+//     const resp = await bt.find_customer(req.body.data);
+//     res.json(resp);
+// });
+
+// braintree_router.route('/find_payment_method')
+// .post(async (req, res, next) => {
+//     const resp = await bt.find_payment_method(req.body.data);
+//     res.json(resp);
+// });
   
-braintree_router.route('/checkout_customer')
-.post(async (req, res, next) => {
-    const resp = await bt.checkout_customer(req.body.data);
-    res.json(resp);
-});
+// braintree_router.route('/checkout_customer')
+// .post(async (req, res, next) => {
+//     const resp = await bt.checkout_customer(req.body.data);
+//     res.json(resp);
+// });
   
-braintree_router.route('/create_customer')
-.post(pass_user, async (req, res, next) => {
-    const { paymentMethodNonce } = req.body;
-    const resp = await bt.create_customer({ paymentMethodNonce, user: req.user });
-    console.log(resp);
-    res.json(resp);
-});
 
 module.exports = {
     braintree_router

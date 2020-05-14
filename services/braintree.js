@@ -93,9 +93,8 @@ const checkout_invoice = async data => {
     }
 }
 
-const create_customer = data => {
-    let { paymentMethodNonce, user } = data;
-    if (!user) user = {};
+const save_payment_method = data => {
+    let { paymentMethodNonce, user } = data
     return new Promise((resolve, reject) => {
         gateway.customer.create({
             firstName: user.username,
@@ -109,19 +108,19 @@ const create_customer = data => {
                 reject(err);
             } else if (result.success) {
                 console.log(result);
-                const customer_id = result.customer.id;
-                const token = result.customer.token;
+                const customer_id = result.customer.id
+                const token = result.customer.token
                 try {
-                    await execute_query('update_item_by_id', { id: user.user_id, condition: { customer_id, token } }, 'user', db);
-                    resolve(success_res());
+                    await execute_query('update_item_by_id', { id: user.user_id, condition: { customer_id, token } }, 'user', db)
+                    resolve(success_res())
                 } catch(er) {
                     reject(er)
                 }
             } else {
-                resolve(fail_res(result.message));
+                resolve(fail_res(result.message))
             }
-        });
-    });
+        })
+    })
 }
 
 const create_nonce = data => {
@@ -214,12 +213,12 @@ const find_payment_method = data => {
 
 module.exports = {
     generate_token,
-    create_nonce,
-    checkout,
-    checkout_remember_customer,
-    find_customer,
-    find_payment_method,
-    checkout_customer,
-    create_customer,
+    // create_nonce,
+    // checkout,
+    // checkout_remember_customer,
+    // find_customer,
+    // find_payment_method,
+    // checkout_customer,
+    save_payment_method,
     checkout_invoice
 }
