@@ -147,9 +147,9 @@ const add_payment_method = data => {
                 reject(err)
             } else if (result.success) {
                 console.log(result)
-                console.log(result.paymentMethods)
+                console.log(result.paymentMethod)
                 try {
-                    await create_payment_method({ ...result.paymentMethods, customer_id: user.customer_id })
+                    await create_payment_method({ ...result.paymentMethod, customer_id: user.customer_id })
                     resolve(success_res())
                 } catch(er) {
                     reject(er)
