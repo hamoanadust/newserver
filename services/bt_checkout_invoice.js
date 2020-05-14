@@ -51,8 +51,8 @@
                             // form.hidden = true;
                         }
                     }
-                    console.log({ data: { paymentMethodNonce: payload.nonce, invoice_id: amount.value } })
-                    xhr.send(JSON.stringify({ data: { paymentMethodNonce: payload.nonce, invoice_id: amount.value } }));
+                    console.log({ data: { paymentMethodNonce: payload.nonce, invoice_id: Array.from(amount.value) } })
+                    xhr.send(JSON.stringify({ data: { paymentMethodNonce: payload.nonce, invoice_id: Array.from(amount.value) } }));
                 });
             });
         }
