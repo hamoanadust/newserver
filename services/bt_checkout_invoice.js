@@ -41,6 +41,7 @@
                     }
                     const xhr = new XMLHttpRequest();
                     xhr.open("POST", "http://biddit.sg:4000/bt/checkout_invoice");
+                    xhr.setRequestHeader('Authorization', `Bearer ${token}`);
                     xhr.setRequestHeader('Content-type', 'application/json');
                     xhr.onreadystatechange = () => {
                         if (xhr.readyState == 4 && xhr.status == 200) {

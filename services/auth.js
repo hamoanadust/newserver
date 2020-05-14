@@ -15,7 +15,6 @@ opts.secretOrKey = config.secretKey
 
 passport.use('user', new JwtStrategy(opts,
     async (jwt_payload, done) => {
-        console.log('jwt payload', jwt_payload)
         db.pool.query("SELECT user_id, customer_id, username, role, name, email, company, contact_number FROM user WHERE user_id = " + jwt_payload.user_id, (err, rows) => {
             console.log(rows)
             if (err) {
@@ -48,7 +47,6 @@ const pass_user = (req, res, next) => {
         if (err) {
             res.json({success: false, statusCode: 403, message: err.message})
         } else {
-            console.log('pass user', user)
             req.user = user
             next()
         }

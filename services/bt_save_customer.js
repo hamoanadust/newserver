@@ -43,7 +43,7 @@
           }
           console.log(payload)
           const xhr = new XMLHttpRequest();
-          xhr.open("POST", "http://biddit.sg:4000/bt/save_payment_method");
+          xhr.open("POST", "http://biddit.sg:4000/bt/create_customer");
           xhr.setRequestHeader('Authorization', `Bearer ${token}`);
           xhr.setRequestHeader('Content-type', 'application/json');
           xhr.onreadystatechange = () => {
