@@ -147,18 +147,13 @@ const add_payment_method = data => {
                 reject(err)
             } else if (result.success) {
                 console.log(result)
-                resolve(success_res())
-                // const customer_id = result.customer.id
-                // console.log(result.customer.paymentMethods)
-                // try {
-                //     await Promise.all([
-                //         execute_query('update_item_by_id', { id: user.user_id, condition: { customer_id } }, 'user', db),
-                //         create_payment_method({ ...result.customer.paymentMethods[0], customer_id, is_default: true })
-                //     ])
-                //     resolve(success_res())
-                // } catch(er) {
-                //     reject(er)
-                // }
+                console.log(result.paymentMethods)
+                try {
+                    await create_payment_method({ ...result.paymentMethods, customer_id: user.customer_id })
+                    resolve(success_res())
+                } catch(er) {
+                    reject(er)
+                }
             } else {
                 resolve(fail_res(result.message))
             }
