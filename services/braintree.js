@@ -51,7 +51,6 @@ const checkout = async data => {
 
 const sale = data => {
     const { amount, paymentMethodNonce, paymentMethodToken } = data
-    // if (token) paymentMethodNonce = undefined
     return new Promise((resolve, reject) => {
         gateway.transaction.sale({
             amount,
@@ -80,12 +79,9 @@ const checkout_invoice = async data => {
         let payment = { amount }
         if (paymentMethodNonce) {
             payment.paymentMethodNonce = paymentMethodNonce
-            console.log('pay by nonce', paymentMethodNonce)
         } else {
-            const payment_methods = await execute_query('get_item_by_condition', { where: { whereand: { customer_id: user.customer_id } } }, 'payment_method', db)
-            
+            const payment_methods = await execute_query('get_item_by_condition', { where: { whereand: { customer_id: user.customer_id } } }, 'payment_method', db) 
             payment.paymentMethodToken = payment_methods.length === 0 ? undefined : payment_methods.find(e => e.is_default) ? payment_methods.find(e => e.is_default).token : payment_methods[0].token
-            console.log('pay by token', payment.paymentMethodToken)
         }
         if (!paymentMethodNonce && !payment.paymentMethodToken) throw new Error('no payment method is provided')
         const resp = await sale(payment)
@@ -133,6 +129,36 @@ const create_customer = data => {
                 } catch(er) {
                     reject(er)
                 }
+            } else {
+                resolve(fail_res(result.message))
+            }
+        })
+    })
+}
+
+const add_payment_method = data => {
+    let { paymentMethodNonce, user } = data
+    return new Promise((resolve, reject) => {
+        gateway.paymentMethod.create({
+            customerId: user.customer_id,
+            paymentMethodNonce
+        }, async (err, result) => {
+            if (err) {
+                reject(err)
+            } else if (result.success) {
+                console.log(result)
+                resolve(success_res())
+                // const customer_id = result.customer.id
+                // console.log(result.customer.paymentMethods)
+                // try {
+                //     await Promise.all([
+                //         execute_query('update_item_by_id', { id: user.user_id, condition: { customer_id } }, 'user', db),
+                //         create_payment_method({ ...result.customer.paymentMethods[0], customer_id, is_default: true })
+                //     ])
+                //     resolve(success_res())
+                // } catch(er) {
+                //     reject(er)
+                // }
             } else {
                 resolve(fail_res(result.message))
             }
@@ -230,5 +256,6 @@ module.exports = {
     // find_payment_method,
     // checkout_customer,
     create_customer,
+    add_payment_method,
     checkout_invoice
 }

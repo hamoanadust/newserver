@@ -90,6 +90,18 @@ season_router.route('/list_season_for_admin')
     }
 })
 
+
+season_router.route('/renew_season_batch')
+.post(verify_admin, async (req, res, next) => {
+    try {
+        req.body.data.user = req.user
+        req.data = await season.renew_season_batch(req.body.data)
+        next()
+    } catch (err) {
+        throw err
+    }
+})
+
 module.exports = {
     season_router
 }

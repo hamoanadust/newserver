@@ -36,6 +36,13 @@ braintree_router.route('/create_customer')
     next()
 })
 
+braintree_router.route('/add_payment_method')
+.post(verify_user, async (req, res, next) => {
+    req.body.data.user = req.user
+    req.data = await bt.add_payment_method(req.body.data)
+    next()
+})
+
 braintree_router.route('/checkout_invoice')
 .post(pass_user, async (req, res, next) => {
     req.body.data.user = req.user

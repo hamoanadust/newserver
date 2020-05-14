@@ -303,6 +303,16 @@ const list_all_season = async data => {
     }
 }
 
+const renew_season_batch = async data => {
+    try {
+        const result = await Promise.all(data.map(e => renew_season_with_invoice(e)))
+        console.log(result)
+        return true
+    } catch (err) {
+        return err
+    }
+}
+
 const list_season = async data => {
     try {
         let { whereand, limit, offset, orderby, orderdirection, user } = data
@@ -361,6 +371,7 @@ module.exports = {
     list_all_season,
     list_season,
     list_season_for_admin,
-    terminate_season
+    terminate_season,
+    renew_season_batch
 }
 
