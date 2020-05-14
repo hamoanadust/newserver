@@ -5,6 +5,7 @@ module.exports = {
         let { statusCode, message } = err
         statusCode = statusCode || 200
         const resp = {
+            success: false,
             status: "error",
             statusCode,
             message

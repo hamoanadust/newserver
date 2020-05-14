@@ -75,8 +75,19 @@ const checkout_invoice = async data => {
         console.log(invoice)
         const amount = invoice.reduce((r, e) => r + e.total_amount, 0)
         const resp = await sale(paymentMethodNonce, amount)
-        console.log(resp)
-        return resp
+        if (resp.success) {
+            console.log(resp)
+            const invoice_item = await execute_query('get_item_by_condition', { where: { invoice_id } }, 'invoice_item', db )
+            const season_id = invoice_item.map(e => e.season_id)
+            await Promise.all([
+                execute_query('update_item_by_id', { condition: { status: 'PAID' }, id: invoice_id }, 'invoice', db),
+                execute_query('update_item_by_id', { condition: { status: 'ACTIVE' }, id: season_id }, 'season', db)
+            ])
+            return true
+        } else {
+            console.log(resp)
+            throw new Error()
+        }
     } catch(err) {
         return err
     }
