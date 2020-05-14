@@ -109,7 +109,8 @@ const save_payment_method = data => {
             } else if (result.success) {
                 console.log(result);
                 const customer_id = result.customer.id
-                const token = result.customer.token
+                console.log(result.customer.paymentMethods)
+                const token = result.customer.paymentMethods.token
                 try {
                     await execute_query('update_item_by_id', { id: user.user_id, condition: { customer_id, token } }, 'user', db)
                     resolve(success_res())
