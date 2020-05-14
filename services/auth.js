@@ -15,7 +15,9 @@ opts.secretOrKey = config.secretKey
 
 passport.use('user', new JwtStrategy(opts,
     async (jwt_payload, done) => {
-        db.pool.query("SELECT user_id, username, role, name, email, company, contact_number FROM user WHERE user_id = " + jwt_payload.user_id, (err, rows) => {
+        console.log('jwt payload', jwt_payload)
+        db.pool.query("SELECT user_id, customer_id, username, role, name, email, company, contact_number FROM user WHERE user_id = " + jwt_payload.user_id, (err, rows) => {
+            console.log(rows)
             if (err) {
                 return done(err, false)
             } else if (rows.length > 0) {
