@@ -1,6 +1,7 @@
 'use strict';
 
 (function() {
+    const token = sessionStorage.getItem('token');
     var amount = document.querySelector('#amount');
     var amountLabel = document.querySelector('label[for="amount"]');
     var form = document.querySelector('#payment-form');

@@ -82,8 +82,6 @@ const checkout_invoice = async data => {
             payment.paymentMethodNonce = paymentMethodNonce
             console.log('pay by nonce', paymentMethodNonce)
         } else {
-            const sql = `select p.token, p.is_default from user u left join payment_method p using (customer_id) where u.user_id = ${db.escape(user.user_id)}`
-            console.log(sql)
             const tokens = await execute_query('get_item_by_condition', { where: { whereand: { customer_id: user.customer_id } } }, 'payment_method', db)
             console.log(tokens)
             payment.token = tokens.length === 1 ? tokens[0] : tokens.find(e => e.is_default)
