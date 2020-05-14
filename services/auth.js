@@ -46,6 +46,7 @@ const pass_user = (req, res, next) => {
         if (err) {
             res.json({success: false, statusCode: 403, message: err.message})
         } else {
+            console.log('pass user', user)
             req.user = user
             next()
         }
