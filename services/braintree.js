@@ -154,7 +154,7 @@ const list_payment_method = async data => {
         const { user } = data
         const { customer_id } = user
         if (!customer_id) return []
-        else return execute_query('get_item_by_condition', { where: { customer_id } }, 'payment_method', db)
+        else return execute_query('get_item_by_condition', { where: { whereand: { customer_id, status: 'ACTIVE' } } }, 'payment_method', db)
     } catch (err) {
         return err
     }
