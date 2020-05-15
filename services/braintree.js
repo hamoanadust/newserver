@@ -102,7 +102,7 @@ const create_payment_method_with_new_customer = data => {
                 try {
                     await Promise.all([
                         execute_query('update_item_by_id', { id: user.user_id, condition: { customer_id } }, 'user', db),
-                        create_payment_method({ ...result.customer.paymentMethods[0], customer_id, is_default: true })
+                        add_payment_method({ ...result.customer.paymentMethods[0], customer_id, is_default: true })
                     ])
                     resolve(success_res('new customer with payment method created'))
                 } catch(er) {
