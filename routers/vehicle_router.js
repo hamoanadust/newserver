@@ -65,6 +65,17 @@ vehicle_router.route('/add_vehicle_for_admin')
     }
 })
 
+vehicle_router.route('/update_vehicle')
+.post(verify_user, async (req, res, next) => {
+    try {
+        req.body.data.user = req.user
+        req.data = await vehicle.update_vehicle(req.body.data)
+        next()
+    } catch (err) {
+        throw err
+    }
+})
+
 module.exports = {
     vehicle_router
 }

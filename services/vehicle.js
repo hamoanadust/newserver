@@ -108,6 +108,22 @@ const remove_vehicle = async data => {
     }
 }
 
+const update_vehicle = async data => {
+    try {
+        const { vehicle_id, vehicle_number, vehicle_type, card_number, card_type, user } = data
+        const { user_id } = user
+        const vehicle = await execute_query('update_item_by_id', { where: { whereand: { vehicle_id, user_id } } }, 'vehicle', db)
+        console.log(vehicle)
+        if (!vehicle || vehicle.length === 0) throw new Error('vehicle not exist')
+        else { 
+            let condition = { vehicle_number, vehicle_type, card_number, card_type }
+            return execute_query('update_item_by_id', { condition, where: { vehicle_id } }, 'vehicle', db)
+        }
+    } catch (err) {
+        return err
+    }
+}
+
 module.exports = {
     get_vehicle_by_condition,
     list_all_vehicle,
@@ -115,5 +131,6 @@ module.exports = {
     list_vehicle_for_admin,
     add_vehicle,
     add_vehicle_for_admin,
-    remove_vehicle
+    remove_vehicle,
+    update_vehicle
 }
