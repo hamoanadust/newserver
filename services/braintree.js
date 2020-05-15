@@ -126,7 +126,7 @@ const create_payment_method_to_customer = data => {
                 reject(err)
             } else if (result.success) {
                 try {
-                    await create_payment_method({ ...result.paymentMethod, customer_id: user.customer_id })
+                    await add_payment_method({ ...result.paymentMethod, customer_id: user.customer_id })
                     resolve(success_res('payment method added to existing customer'))
                 } catch(er) {
                     reject(er)
@@ -138,7 +138,7 @@ const create_payment_method_to_customer = data => {
     })
 }
 
-const create_payment_method = data => {
+const add_payment_method = data => {
     const { customer_id, token, cardType, maskedNumber, expirationDate, last4, is_default } = data
     const item = { customer_id, token, cardType, maskedNumber, expirationDate, last4, is_default, created_at: moment().format('YYYY-MM-DD'), updated_at: moment().format('YYYY-MM-DD') }
     return execute_query('create_item', item, 'payment_method', db)
