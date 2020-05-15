@@ -49,7 +49,7 @@ const prepare_season_invoice_data_for_renew = async data => {
         attn = attn || 'system'
         invoice_date = invoice_date || moment().format('YYYY-MM-DD')
         const rate = season_rate[0].rate
-        const months = moment(end_date).diff(moment(szn[0].end_date), 'month')
+        const months = moment(end_date).startOf('month').diff(moment(szn[0].end_date).startOf('month'), 'month')
         const invoice_amount = months * rate
         const total_amount = invoice_amount * 1.07
         const supplier_name = system_config.find(e => e.config_key === 'name') ? system_config.find(e => e.config_key === 'name').config_value : ''
@@ -203,8 +203,11 @@ const prepare_season_invoice_data = async data => {
         //calculate rate
         const rate = season_rate[0].rate
         const firstPart = moment(start_date).endOf('month').diff(moment(start_date), 'day')/moment(start_date).endOf('month').diff(moment(start_date).startOf('month'), 'day')
-        const secondPart = moment(end_date).diff(moment(start_date).endOf('month'), 'month')
-        const months = firstPart + secondPart
+        const secondPart = moment(end_date).startOf('month').diff(moment(start_date).startOf('month'), 'month')
+        const months = +(firstPart + secondPart).toFixed(2)
+        console.log(firstPart)
+        console.log(secondPart)
+        console.log(months)
         // let invoice_amount
         // if (moment(start_date).format('YYYY-MM-DD') === moment(start_date).startOf('month').format('YYYY-MM-DD')) {
         //     const months = moment(end_date).diff(moment(start_date), 'month')
