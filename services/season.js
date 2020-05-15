@@ -156,6 +156,13 @@ const prepare_season_invoice_data = async data => {
         else if (!start_date) throw new Error('no start date')
         else if (!end_date) throw new Error('no end date')
         else if (moment(start_date).isAfter(moment(end_date))) throw new Error('start date is after end date')
+        else if (moment(end_date).endOf('month').format('YYYY-MM-DD')!==moment(end_date).format('YYYY-MM-DD')) {
+            console.log(moment(end_date).endOf('month').format('YYYY-MM-DD'))
+            console.log(moment(end_date).format('YYYY-MM-DD'))
+            throw new Error('end date must be end of month')
+        } else if (moment(start_date).date() >= 15 && moment(end_date).diff(moment(start_date), 'month') < 1) {
+            throw new Error('start date after 15, end date must be at least the end of the next month')
+        }
         //set default value
         card_type = card_type || 'IU'
         vehicle_type = vehicle_type || 'CAR'
@@ -195,15 +202,23 @@ const prepare_season_invoice_data = async data => {
         const carpark_address = carpark[0].address
         //calculate rate
         const rate = season_rate[0].rate
-        const months = moment(end_date).diff(moment(start_date), 'month')
+        const firstPart = moment(start_date).endOf('month').diff(moment(start_date), 'day')/moment(start_date).endOf('month').diff(moment(start_date).startOf('month'), 'day')
+        const secondPart = moment(end_date).diff(moment(start_date).endOf('month'), 'month')
+        const months = firstPart + secondPart
+        // let invoice_amount
+        // if (moment(start_date).format('YYYY-MM-DD') === moment(start_date).startOf('month').format('YYYY-MM-DD')) {
+        //     const months = moment(end_date).diff(moment(start_date), 'month')
+        //     invoice_amount = months * rate
+        // } else {
+        // }
         const invoice_amount = months * rate
         const total_amount = invoice_amount * 1.07
         //season and invoice data ready
         const season_data = { carpark_id, card_number, start_date, end_date, card_type, vehicle_type, holder_type, vehicle_number, holder_id, holder_name, holder_company, holder_address, holder_contact_number, holder_email }
-        const invoice_data = {invoice_number, invoice_date, invoice_type: 'NEW', invoice_amount, total_amount, attn, carpark_id, carpark_name, carpark_address, 
+        const invoice_data = { invoice_number, invoice_date, invoice_type: 'NEW', invoice_amount, total_amount, attn, carpark_id, carpark_name, carpark_address, 
             buyer_id: holder_id, buyer_name: holder_name, buyer_company: holder_company, buyer_address: holder_address, buyer_email: holder_email, buyer_contact_number: holder_contact_number, 
             supplier_name, supplier_address, supplier_email, supplier_contact_number, supplier_fax, supplier_uen, supplier_rcb,
-            status: 'OUTSTANDING', created_at: moment().format('YYYY-MM-DD HH:mm:ss'), updated_at: moment().format('YYYY-MM-DD HH:mm:ss'), created_by: 'system', updated_by: 'system', months}
+            status: 'OUTSTANDING', created_at: moment().format('YYYY-MM-DD HH:mm:ss'), updated_at: moment().format('YYYY-MM-DD HH:mm:ss'), created_by: 'system', updated_by: 'system', months }
         return {season_data, invoice_data}
     } catch (err) {
         throw err
