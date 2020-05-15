@@ -35,31 +35,35 @@ braintree_router.route('/generate_token')
     res.json(resp)
 })
 
-braintree_router.route('/create_payment_method')
-.post(verify_user, async (req, res, next) => {
-    req.body.data.user = req.user
-    req.data = await bt.create_payment_method(req.body.data)
-    next()
-})
-
 braintree_router.route('/checkout_invoice')
 .post(pass_user, async (req, res, next) => {
+    req.body.data = req.body.data || {}
     req.body.data.user = req.user
     req.data = await bt.checkout_invoice(req.body.data)
     next()
 })
 
-braintree_router.route('/find_customer')
+braintree_router.route('/create_payment_method')
 .post(verify_user, async (req, res, next) => {
+    req.body.data = req.body.data || {}
     req.body.data.user = req.user
-    req.data = await bt.find_customer(req.body.data)
+    req.data = await bt.create_payment_method(req.body.data)
     next()
 })
 
 braintree_router.route('/list_payment_method')
 .post(verify_user, async (req, res, next) => {
+    req.body.data = req.body.data || {}
     req.body.data.user = req.user
     req.data = await bt.list_payment_method(req.body.data)
+    next()
+})
+
+braintree_router.route('/delete_payment_method')
+.post(verify_user, async (req, res, next) => {
+    req.body.data = req.body.data || {}
+    req.body.data.user = req.user
+    req.data = await bt.delete_payment_method(req.body.data)
     next()
 })
 

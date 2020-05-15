@@ -42,7 +42,7 @@ const sale = data => {
 
 const checkout_invoice = async data => {
     try {
-        const { paymentMethodNonce, invoice_id, user } = data
+        const { paymentMethodNonce, invoice_id, user, payment_method_id } = data
         const invoice = await execute_query('get_item_by_condition', { where: { whereand: { invoice_id, status: 'OUTSTANDING' } } }, 'invoice', db)
         if (!invoice || invoice.length === 0) throw new Error('No outstanding invoice is found')
         else if (Array.isArray(invoice_id) && invoice_id.length !== invoice.length) throw new Error('Some of the outstanding invoices are not found')
@@ -50,9 +50,14 @@ const checkout_invoice = async data => {
         let payment = { amount }
         if (paymentMethodNonce) {
             payment.paymentMethodNonce = paymentMethodNonce
+        } else if (payment_method_id) {
+            const payment_methods = await execute_query('get_item_by_condition', { where: { whereand: { customer_id: user.customer_id, payment_method_id, status: 'ACTIVE' } } }, 'payment_method', db) 
+            if (!payment_methods || payment_methods.length === 0) throw new Error('payment method not found')
+            else payment.paymentMethodToken = payment_methods[0].token
         } else {
-            const payment_methods = await execute_query('get_item_by_condition', { where: { whereand: { customer_id: user.customer_id } } }, 'payment_method', db) 
-            payment.paymentMethodToken = payment_methods.length === 0 ? undefined : payment_methods.find(e => e.is_default) ? payment_methods.find(e => e.is_default).token : payment_methods[0].token
+            const payment_methods = await execute_query('get_item_by_condition', { where: { whereand: { customer_id: user.customer_id, status: 'ACTIVE' } } }, 'payment_method', db) 
+            if (!payment_methods || payment_methods.length === 0) throw new Error('payment method not found')
+            payment.paymentMethodToken = payment_methods.find(e => e.is_default) ? payment_methods.find(e => e.is_default).token : payment_methods[0].token
         }
         if (!paymentMethodNonce && !payment.paymentMethodToken) throw new Error('no payment method is provided')
         const resp = await sale(payment)
@@ -144,34 +149,21 @@ const add_payment_method = data => {
     return execute_query('create_item', item, 'payment_method', db)
 }
 
-
-const find_customer = data => {
-    const { user } = data
-    const { customer_id } = user
-    return new Promise((resolve, reject) => {
-        gateway.customer.find(customer_id, (err, customer) => {
-            if (err) reject(err)
-            resolve(customer)
-        })
-    })
-}
-
 const list_payment_method = async data => {
     try {
         const { user } = data
         const { customer_id } = user
         if (!customer_id) return []
-        else {
-            const resp = await execute_query('get_item_by_condition', { where: { customer_id } }, 'payment_method', db)
-            console.log(resp)
-            return resp
-            // return new Promise((resolve, reject) => {
-            //     gateway.paymentMethod.find(token, (err, paymentMethod) => {
-            //         if (err) reject(err)
-            //         resolve(paymentMethod)
-            //     })
-            // })
-        }
+        else return execute_query('get_item_by_condition', { where: { customer_id } }, 'payment_method', db)
+    } catch (err) {
+        return err
+    }
+}
+
+const delete_payment_method = data => {
+    try {
+        const { payment_method_id, user } = data
+        return execute_query('update_item_by_id', { condition: { status: 'INACTIVE' }, id: payment_method_id }, 'payment_method', db)
     } catch (err) {
         return err
     }
@@ -181,6 +173,6 @@ module.exports = {
     generate_token,
     create_payment_method,
     checkout_invoice,
-    find_customer,
-    list_payment_method
+    list_payment_method,
+    delete_payment_method
 }
