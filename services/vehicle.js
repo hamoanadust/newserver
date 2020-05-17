@@ -112,7 +112,7 @@ const update_vehicle = async data => {
     try {
         const { vehicle_id, vehicle_number, vehicle_type, card_number, card_type, user } = data
         const { user_id } = user
-        const vehicle = await execute_query('update_item_by_id', { where: { whereand: { vehicle_id, user_id } } }, 'vehicle', db)
+        const vehicle = await execute_query('get_item_by_condition', { where: { whereand: { vehicle_id, user_id } } }, 'vehicle', db)
         console.log(vehicle)
         if (!vehicle || vehicle.length === 0) throw new Error('vehicle not exist')
         else { 
