@@ -39,7 +39,19 @@ season_router.route('/add_season_with_invoice')
 season_router.route('/renew_season_with_invoice')
 .post(verify_user, async (req, res, next) => {
     try {
+        req.body.data.user = req.user
         req.data = await season.renew_season_with_invoice(req.body.data)
+        next()
+    } catch (err) {
+        throw err
+    }
+})
+
+season_router.route('/renew_season_batch')
+.post(verify_user, async (req, res, next) => {
+    try {
+        req.body.data.user = req.user
+        req.data = await season.renew_season_batch(req.body.data)
         next()
     } catch (err) {
         throw err
