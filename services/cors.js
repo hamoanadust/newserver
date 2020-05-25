@@ -1,6 +1,6 @@
 const cors = require('cors')
 
-const whitelist = ['http://localhost:4201', 'http://localhost:4200', 'http://localhost:80', 'http://localhost:8080', 'http://biddit.sg:4000', undefined]
+const whitelist = ['http://localhost:4201', 'http://localhost:4200', 'http://localhost', 'http://localhost:80', 'http://localhost:8080', 'http://biddit.sg:4000', undefined]
 
 const option = {
     origin: (origin, callback) => {
