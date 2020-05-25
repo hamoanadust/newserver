@@ -458,15 +458,13 @@ const renew_season_batch = async data => {
 //     }
 // }
 
-// const add_season_by_admin = async data => {
-//     try {
-//         const {season_data} = await prepare_season_invoice_data(data)
-//         await execute_query('create_item', season_data, 'season', db)
-//         return season_data
-//     } catch (err) {
-//         return err
-//     }
-// }
+const add_season_by_admin = async data => {
+    try {
+        return 'under development'
+    } catch (err) {
+        return err
+    }
+}
 
 const list_all_season = async data => {
     try {
