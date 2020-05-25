@@ -159,7 +159,7 @@ const renew_season_with_invoice = async data => {
 const renew_season_batch = async data => {
     try {
         const { seasons, user } = data
-        const whereand = { holder_id: user.user_id, season_id: season.map(e => e.season_id) }
+        const whereand = { holder_id: user.user_id, season_id: seasons.map(e => e.season_id) }
         const condition = { where: { whereand } }
         let szns = await execute_query('get_item_by_condition', condition, 'season', db)
         szns.forEach(e => {
