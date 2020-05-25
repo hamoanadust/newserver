@@ -53,6 +53,13 @@ user_router.route('/create_signup_otp')
     }
 })
 
+user_router.route('/update_profile')
+.post(verify_user, async (req, res, next) => {
+    req.body.data.user = req.user
+    req.data = await user.update_profile(req.body.data)
+    next()
+})
+
 // user_router.route('/get_access_control')
 // .post(verify_user, async (req, res, next) => {
 //     let data = { ...req.body.data, user: req.user }

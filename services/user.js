@@ -92,9 +92,21 @@ const change_password = async data => {
     }
 }
 
+const update_profile = async data => {
+    try {
+        const { name, company, email, contact_number, user } = data
+        let condition = { name, company, email, contact_number }
+        const resp = await execute_query('update_item_by_id', { id: user.user_id, condition }, 'user', db)
+        return true
+    } catch (err) {
+        return err
+    }
+}
+
 module.exports = {
     signup,
     signin,
     change_password,
-    create_signup_otp
+    create_signup_otp,
+    update_profile
 }

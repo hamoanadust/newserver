@@ -323,6 +323,11 @@ const list_all_season = async data => {
 
 const renew_season_batch = async data => {
     try {
+        const { season, user } = data
+        const whereand = { holder_id: user.user_id, season_id: season.map(e => e.season_id) }
+        const condition = { where: { whereand } }
+        const resp = await execute_query('get_item_by_condition', condition, 'season', db)
+        resp.map(e => e.end_date)
         const result = await Promise.all(data.map(e => renew_season_with_invoice(e)))
         console.log(result)
         return true
