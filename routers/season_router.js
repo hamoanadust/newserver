@@ -15,7 +15,7 @@ season_router.route('/find_season')
 })
 
 season_router.route('/add_season_by_admin')
-.post(verify_admin, async (req, res, next) => {
+.post(verify_user, async (req, res, next) => {
     try {
         req.body.data.user = req.user
         req.data = await season.add_season_by_admin(req.body.data)
