@@ -68,16 +68,19 @@ const list_invoice = async data => {
 
 const list_invoice_for_admin = async data => {
     try {
-        let { where, limit, offset, orderby, orderdirection } = data;
-        const order = orderby ? `order by ${orderby} ${orderdirection || 'desc'}` : '';
-        const limitation = limit === 'no' ? '' : `limit ${limit || '100'}`;
-        const offsetion = offset ? `offset ${offset}` : '';
-        const sql = `select inv.*, item.*, s.card_number, s.card_type, s.start_date, s.end_date, s.status as season_status, s.vehicle_number, s.vehicle_type from invoice inv left join invoice_item item using (invoice_id) left join season s on item.season_id = s.season_id where ${prepare_where(where, db)} ${order} ${limitation} ${offsetion}`
-        const resp = await db.query(sql)
-        return resp;
+        let { where, limit, offset, orderby, orderdirection } = data
+        const invoices = await execute_query('get_item_by_condition', { where, limit, offset, orderby, orderdirection }, 'invoice', db)
+        const sql = `select item.*, s.*, c.carpark_name, c.carpark_code, c.address as carpark_address, c.postal_code from invoice_item item left join season s using(season_id) left join carpark c using(carpark_id) where invoice_id in (${invoices.map(e => e.invoice_id).toString()})`
+        const items = await db.query(sql)
+        const resp = invoices.map(e => {
+            return {
+                ...e,
+                invoice_items: items.filter(i => i.invoice_id === e.invoice_id)
+            }
+        })
+        return resp
     } catch (err) {
-        console.log('list_invoice err');
-        throw(err);
+        return err
     }
 }
 
