@@ -103,11 +103,11 @@ season_router.route('/list_season_for_admin')
 })
 
 
-season_router.route('/renew_season_batch_admin')
+season_router.route('/auto_renew')
 .post(verify_admin, async (req, res, next) => {
     try {
         req.body.data.user = req.user
-        req.data = await season.renew_season_batch_admin(req.body.data)
+        req.data = await season.auto_renew(req.body.data)
         next()
     } catch (err) {
         throw err

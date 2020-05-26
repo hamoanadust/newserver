@@ -2,6 +2,7 @@ const db = require('./db')
 const { success_res, fail_res, fill_zero } = require('./tool')
 const { execute_query } = require('./dao')
 const moment = require('moment')
+const { checkout_invoice } = require('./braintree')
 
 const find_season = async data => {
     try {
@@ -201,16 +202,36 @@ const list_all_season = async data => {
     }
 }
 
-
-const renew_season_batch_admin = async data => {
+const auto_renew = async data => {
     try {
-        const { season, user } = data
-        const whereand = { holder_id: user.user_id, season_id: season.map(e => e.season_id) }
-        const condition = { where: { whereand } }
-        const resp = await execute_query('get_item_by_condition', condition, 'season', db)
-        resp.map(e => e.end_date)
-        const result = await Promise.all(data.map(e => renew_season_with_invoice(e)))
-        console.log(result)
+        const { user } = data
+        const sql = `select s.season_id, s.end_date as old_end_date, u.user_id, u.customer_id, u.name, u.email, u.contact_number, p.token, p.payment_method_id from season s left join user u on s.holder_id = u.user_id right join payment_method p on (u.customer_id = p.customer_id && p.status = 'ACTIVE' && p.is_default = true) where s.auto_renew = true and s.status = 'ACTIVE' and s.holder_id is not null and u.customer_id is not null and MONTH(s.end_date) = MONTH(NOW())`
+        let szns = await db.query(sql)
+        const seasons = szns.map(e => { 
+            return { 
+                season_id: e.season_id,
+                payment_method_id: e.payment_method_id, 
+                end_date: moment(e.end_date).startOf('month').add(1, 'month').endOf('month').format('YYYY-MM-DD'),
+                attn: 'AUTO RENEW',
+                user: {
+                    user_id: e.user_id,
+                    name: e.name, 
+                    company: e.company, 
+                    email: e.email, 
+                    contact_number: e.contact_number,
+                    address: e.address
+                }
+            } 
+        })
+        const resp = await Promise.all(seasons.map(e => renew_season_with_invoice(e)))
+        const items = resp.map(e => {
+            let item = seasons.find(s => s.season_id === e.season.season_id)
+            return {
+                invoice_id: e.invoice.invoice_id,
+                payment_method_id: item.payment_method_id
+            }
+        })
+        await Promise.all(items.map(e => checkout_invoice(e)))
         return true
     } catch (err) {
         return err
@@ -266,6 +287,6 @@ module.exports = {
     list_season_for_admin,
     terminate_season,
     renew_season_batch,
-    renew_season_batch_admin
+    auto_renew
 }
 
