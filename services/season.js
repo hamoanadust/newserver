@@ -46,7 +46,7 @@ const create_season = async data => {
         const amount = unit_price * quantity
         const description = `${renew ? 'Renew' : 'Purchase new'} season for ${quantity} ${quantity === 1 ? 'month' : 'months'}`
         const season_id = season.insertId
-        return { ...item, unit_price, quantity, amount, description, season_id, carpark_name, carpark_code, address, postal_code, invoice_item: { unit_price, quantity, amount, description, season_id } }
+        return { ...item, unit_price, quantity, amount, description, season_id, carpark_name, carpark_code, carpark_address, postal_code, invoice_item: { unit_price, quantity, amount, description, season_id } }
     } catch(err) {
         throw err
     }
