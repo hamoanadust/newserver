@@ -65,8 +65,8 @@ const checkout_invoice = async data => {
             const invoice_item = await execute_query('get_item_by_condition', { where: { invoice_id } }, 'invoice_item', db )
             const season_id = invoice_item.map(e => e.season_id)
             await Promise.all([
-                execute_query('update_item_by_id', { condition: { status: 'PAID' }, where: { invoice_id } }, 'invoice', db),
-                execute_query('update_item_by_id', { condition: { status: 'ACTIVE' }, where: { season_id } }, 'season', db)
+                db.query(`update invoice set status = 'PAID' where invoice_id in (${invoice_id.toString()})`),
+                db.query(`update season set status = 'ACTIVE' where season_id in (${season_id.toString()})`)
             ])
             return true
         } else {
