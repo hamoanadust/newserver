@@ -45,7 +45,7 @@ const modify_carpark = async data => {
     }
 }
 
-const get_carpark_detail = data => {
+const get_carpark_detail = async data => {
     try {
         const { carpark_id } = data
         if (!carpark_id) throw new Error('carpark_id is required')
@@ -59,7 +59,7 @@ const get_carpark_detail = data => {
     }
 }
 
-const add_season_rate = data => {
+const add_season_rate = async data => {
     try {
         const { carpark_id, client_type, vehicle_type, rate, remarks, user } = data
         const item = { carpark_id, client_type, vehicle_type, rate, remarks, updated_by: user.username, updated_at: moment().format('YYYY-MM-DD HH:mm:ss') }
@@ -70,7 +70,7 @@ const add_season_rate = data => {
     }
 }
 
-const modify_season_rate = data => {
+const modify_season_rate = async data => {
     try {
         const { season_rate_id, client_type, vehicle_type, rate, remarks, status, user } = data
         const condition = { client_type, vehicle_type, rate, remarks, status, updated_by: user.username, updated_at: moment().format('YYYY-MM-DD HH:mm:ss') }
