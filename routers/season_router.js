@@ -102,12 +102,22 @@ season_router.route('/list_season_for_admin')
     }
 })
 
-
 season_router.route('/auto_renew')
 .post(verify_admin, async (req, res, next) => {
     try {
         req.body.data.user = req.user
         req.data = await season.auto_renew(req.body.data)
+        next()
+    } catch (err) {
+        throw err
+    }
+})
+
+season_router.route('/set_auto_renew')
+.post(verify_user, async (req, res, next) => {
+    try {
+        req.body.data.user = req.user
+        req.data = await season.set_auto_renew(req.body.data)
         next()
     } catch (err) {
         throw err

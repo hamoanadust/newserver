@@ -38,6 +38,7 @@ const create_season = async data => {
         if (!season) throw new Error('create season fail')
         else if (!carpark || carpark.length === 0) throw new Error('no carpark')
         else if (!season_rate || season_rate.length === 0) throw new Error('no season rate')
+        const { carpark_name, carpark_code, address: carpark_address, postal_code } = carpark[0]
         const unit_price = season_rate[0].rate
         const firstPart = moment(start_date).endOf('month').diff(moment(start_date), 'day')/moment(start_date).endOf('month').diff(moment(start_date).startOf('month'), 'day')
         const secondPart = moment(end_date).startOf('month').diff(moment(start_date).startOf('month'), 'month')
@@ -45,7 +46,7 @@ const create_season = async data => {
         const amount = unit_price * quantity
         const description = `${renew ? 'Renew' : 'Purchase new'} season for ${quantity} ${quantity === 1 ? 'month' : 'months'}`
         const season_id = season.insertId
-        return { ...item, unit_price, quantity, amount, description, season_id, invoice_item: { unit_price, quantity, amount, description, season_id } }
+        return { ...item, unit_price, quantity, amount, description, season_id, carpark_name, carpark_code, address, postal_code, invoice_item: { unit_price, quantity, amount, description, season_id } }
     } catch(err) {
         throw err
     }
@@ -204,11 +205,12 @@ const list_all_season = async data => {
 
 const set_auto_renew = async data => {
     try {
-        const { season_id, user } = data
-        const payment_method = await execute_query('get_item_by_condition', { where: { whereand: { } } })
-        const condition = { where: { holder_id }, limit: 'no' }
-        const resp = await execute_query('get_item_by_condition', condition, 'season', db)
-        return resp
+        const { season_id, auto_renew, user } = data
+        if (!user.customer_id) throw new Error('Cannot set auto renew, there is no payment method saved')
+        const payment_method = await execute_query('get_item_by_condition', { where: { whereand: { customer_id: user.customer_id, is_default: true } } }, 'payment_method', db)
+        if (!payment_method || payment_method.length === 0) throw new Error('Cannot set auto renew, there is no payment method saved')
+        await execute_query('update_item_by_id', { condition: { auto_renew }, id: season_id }, 'season', db)
+        return true
     } catch (err) {
         return err
     }
@@ -299,6 +301,7 @@ module.exports = {
     list_season_for_admin,
     terminate_season,
     renew_season_batch,
-    auto_renew
+    auto_renew,
+    set_auto_renew
 }
 
