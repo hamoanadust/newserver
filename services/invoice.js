@@ -30,8 +30,15 @@ const find_invoice = async data => {
 const list_all_invoice = async data => {
     try {
         let { user } = data
-        const sql = `select inv.*, item.*, s.card_number, s.card_type, s.start_date, s.end_date, s.status as season_status, s.vehicle_number, s.vehicle_type from invoice inv left join invoice_item item using (invoice_id) left join season s on item.season_id = s.season_id where inv.buyer_id = ${user.user_id} and inv.status in ('OUTSTANDING', 'PAID')`
-        const resp = await db.query(sql)
+        const invoices = await execute_query('get_item_by_condition', { where: { whereand: { buyer_id: user.user_id, status: ['PAID', 'OUTSTANDING'] } } }, 'invoice', db)
+        const sql = `select item.*, s.*, c.carpark_name, c.carpark_code, c.address as carpark_address, c.postal_code from invoice_item item left join season s using(season_id) left join carpark c using(carpark_id) where invoice_id in (${invoices.map(e => e.invoice_id).toString()})`
+        const items = await db.query(sql)
+        const resp = invoices.map(e => {
+            return {
+                ...e,
+                invoice_items: items.filter(i => i.invoice_id === e.invoice_id)
+            }
+        })
         return resp
     } catch (err) {
         return err
