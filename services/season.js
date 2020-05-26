@@ -152,7 +152,7 @@ const renew_season_with_invoice = async data => {
         const invoice_items = [season.invoice_item]
         const invoice_data = { invoice_items, invoice_type: 'RENEW', attn, buyer_id: user.user_id, buyer_name: user.name, buyer_company: user.company, buyer_email: user.email, buyer_contact_number: user.contact_number, buyer_address: user.address, created_by: user.username }
         const invoice = await create_invoice(invoice_data)
-        return { invoice, season }
+        return { invoice, season, invoice_item: season.invoice_item }
     } catch(err) {
         return err
     }
