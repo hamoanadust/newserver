@@ -129,7 +129,7 @@ const add_season_with_invoice = async data => {
         const invoice_items = [season.invoice_item]
         const invoice_data = { invoice_items, invoice_type: 'NEW', attn, buyer_id: holder_id, buyer_name: holder_name, buyer_company: holder_company, buyer_email: holder_email, buyer_contact_number: holder_contact_number, buyer_address: holder_address, created_by }
         const invoice = await create_invoice(invoice_data)
-        return { invoice, season }
+        return { invoice, season, invoice_item: season.invoice_item }
     } catch (err) {
         return err
     }
