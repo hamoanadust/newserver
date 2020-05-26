@@ -49,6 +49,42 @@ carpark_router.route('/modify_carpark')
     }
 })
 
+carpark_router.route('/get_carpark_detail')
+.post(verify_admin, async (req, res, next) => {
+    try {
+        req.body.data.user = req.user
+        req.data = await carpark.get_carpark_detail(req.body.data)
+        next()
+    } catch (err) {
+        req.data = err
+        next()
+    }
+})
+
+carpark_router.route('/add_season_rate')
+.post(verify_admin, async (req, res, next) => {
+    try {
+        req.body.data.user = req.user
+        req.data = await carpark.add_season_rate(req.body.data)
+        next()
+    } catch (err) {
+        req.data = err
+        next()
+    }
+})
+
+carpark_router.route('/modify_season_rate')
+.post(verify_admin, async (req, res, next) => {
+    try {
+        req.body.data.user = req.user
+        req.data = await carpark.modify_season_rate(req.body.data)
+        next()
+    } catch (err) {
+        req.data = err
+        next()
+    }
+})
+
 module.exports = {
     carpark_router
 }

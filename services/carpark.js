@@ -45,9 +45,48 @@ const modify_carpark = async data => {
     }
 }
 
+const get_carpark_detail = data => {
+    try {
+        const { carpark_id } = data
+        if (!carpark_id) throw new Error('carpark_id is required')
+        const [carpark, season_rate] = await Promise.all([
+            execute_query('get_item_by_condition', { where: { carpark_id } }, 'carpark', db),
+            execute_query('get_item_by_condition', { where: { carpark_id } }, 'season_rate', db)
+        ])
+        return { ...carpark, season_rate }
+    } catch (err) {
+        return err
+    }
+}
+
+const add_season_rate = data => {
+    try {
+        const { carpark_id, client_type, vehicle_type, rate, remarks, user } = data
+        const item = { carpark_id, client_type, vehicle_type, rate, remarks, updated_by: user.username, updated_at: moment().format('YYYY-MM-DD HH:mm:ss') }
+        await execute_query('create_item', item, 'season_rate', db)
+        return true
+    } catch (err) {
+        return err
+    }
+}
+
+const modify_season_rate = data => {
+    try {
+        const { season_rate_id, client_type, vehicle_type, rate, remarks, status, user } = data
+        const condition = { client_type, vehicle_type, rate, remarks, status, updated_by: user.username, updated_at: moment().format('YYYY-MM-DD HH:mm:ss') }
+        await execute_query('update_item_by_id', { id: season_rate_id, condition }, 'season_rate', db)
+        return true
+    } catch (err) {
+        return err
+    }
+}
+
 module.exports = {
     list_carpark,
     list_all_carpark,
     add_carpark,
-    modify_carpark
+    modify_carpark,
+    get_carpark_detail,
+    add_season_rate,
+    modify_season_rate
 }
