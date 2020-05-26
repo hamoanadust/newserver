@@ -47,8 +47,11 @@ const list_all_invoice = async data => {
 
 const list_invoice = async data => {
     try {
-        let { limit, offset, orderby, orderdirection, user } = data
-        const invoices = await execute_query('get_item_by_condition', { where: { whereand: { buyer_id: user.user_id, status: ['PAID', 'OUTSTANDING'] } }, limit, offset, orderby, orderdirection }, 'invoice', db)
+        let { where, limit, offset, orderby, orderdirection, user } = data
+        where = where || { whereand: { buyer_id: user.user_id } }
+        where.whereand = where.whereand || { buyer_id: user.user_id }
+        where.whereand.buyer_id = user.user_id
+        const invoices = await execute_query('get_item_by_condition', { where, limit, offset, orderby, orderdirection }, 'invoice', db)
         const sql = `select item.*, s.*, c.carpark_name, c.carpark_code, c.address as carpark_address, c.postal_code from invoice_item item left join season s using(season_id) left join carpark c using(carpark_id) where invoice_id in (${invoices.map(e => e.invoice_id).toString()})`
         const items = await db.query(sql)
         const resp = invoices.map(e => {

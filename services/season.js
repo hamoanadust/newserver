@@ -202,6 +202,18 @@ const list_all_season = async data => {
     }
 }
 
+const set_auto_renew = async data => {
+    try {
+        const { season_id, user } = data
+        const payment_method = await execute_query('get_item_by_condition', { where: { whereand: { } } })
+        const condition = { where: { holder_id }, limit: 'no' }
+        const resp = await execute_query('get_item_by_condition', condition, 'season', db)
+        return resp
+    } catch (err) {
+        return err
+    }
+}
+
 const auto_renew = async data => {
     try {
         const { user } = data
