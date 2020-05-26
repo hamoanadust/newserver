@@ -53,7 +53,7 @@ const get_carpark_detail = async data => {
             execute_query('get_item_by_condition', { where: { carpark_id } }, 'carpark', db),
             execute_query('get_item_by_condition', { where: { carpark_id } }, 'season_rate', db)
         ])
-        return { ...carpark, season_rate }
+        return { ...carpark[0], season_rate }
     } catch (err) {
         return err
     }
