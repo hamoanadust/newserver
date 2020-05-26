@@ -31,7 +31,8 @@ invoice_router.route('/list_all_invoice')
 invoice_router.route('/list_invoice')
 .post(verify_user, async (req, res, next) => {
     try {
-        req.data = await invoice.list_invoice({ user: req.user })
+        req.body.data.user = req.user
+        req.data = await invoice.list_invoice(req.body.data)
         next()
     } catch (err) {
         throw err
