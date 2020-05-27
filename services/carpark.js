@@ -17,15 +17,11 @@ const list_all_carpark = () => execute_query('get_item_by_condition', { where: {
 
 const add_carpark = data => {
     try {
-        let { carpark_name, carpark_code, address, postal_code, public_policy, billing_method, tenant_slot_total, tenant_slot_available, public_slot_total, public_slot_available, remarks, user } = data
+        let { carpark_name, carpark_code, address, postal_code, public_policy, billing_method, allow_giro, allow_auto_renew, remarks, user } = data
         if (!carpark_name) throw new Error('carpark_name is required')
-        if (!tenant_slot_total) throw new Error('tenant_slot_total is required')
-        if (!public_slot_total) throw new Error('public_slot_total is required')
         public_policy = public_policy || 'ALLOW'
-        billing_method = billing_method || 'CREDIT_CARD,PAYNOW,CHECK,GIRO'
-        tenant_slot_available = tenant_slot_available || tenant_slot_total
-        public_slot_available = public_slot_available || public_slot_total
-        const item = { carpark_name, carpark_code, address, postal_code, public_policy, billing_method, tenant_slot_total, tenant_slot_available, public_slot_total, public_slot_available, remarks, updated_by: user.username, updated_at: moment().format('YYYY-MM-DD HH:mm:ss'), status: 'ACTIVE' } 
+        billing_method = billing_method || 'CREDIT_CARD,PAYNOW,CHECK'
+        const item = { carpark_name, carpark_code, address, postal_code, public_policy, billing_method, allow_giro, allow_auto_renew, remarks, updated_by: user.username, updated_at: moment().format('YYYY-MM-DD HH:mm:ss'), status: 'ACTIVE' } 
         return execute_query('create_item', item, 'carpark', db)
     } catch (err) {
         return err
@@ -34,11 +30,11 @@ const add_carpark = data => {
 
 const modify_carpark = async data => {
     try {
-        const { carpark_id, carpark_name, carpark_code, address, postal_code, public_policy, billing_method, tenant_slot_total, tenant_slot_available, public_slot_total, public_slot_available, remarks, status, user } = data
+        const { carpark_id, carpark_name, carpark_code, address, postal_code, public_policy, billing_method, allow_giro, allow_auto_renew, remarks, status, user } = data
         if (!carpark_id) throw new Error('carpark_id is required')
         const cpk = await execute_query('get_item_by_condition', { where: { carpark_id } }, 'carpark', db)
         if (!cpk || cpk.length === 0) throw new Error('carpark not found')
-        const item = { condition: { carpark_name, carpark_code, address, postal_code, public_policy, billing_method, tenant_slot_total, tenant_slot_available, public_slot_total, public_slot_available, remarks, status, updated_at: moment().format('YYYY-MM-DD HH:mm:ss'), updated_by: user.username }, id: carpark_id }
+        const item = { condition: { carpark_name, carpark_code, address, postal_code, public_policy, billing_method, allow_giro, allow_auto_renew, remarks, status, updated_at: moment().format('YYYY-MM-DD HH:mm:ss'), updated_by: user.username }, id: carpark_id }
         return execute_query('update_item_by_id', item, 'carpark', db)
     } catch (err) {
         return err
@@ -61,8 +57,8 @@ const get_carpark_detail = async data => {
 
 const add_season_rate = async data => {
     try {
-        const { carpark_id, client_type, vehicle_type, rate, remarks, user } = data
-        const item = { carpark_id, client_type, vehicle_type, rate, remarks, updated_by: user.username, updated_at: moment().format('YYYY-MM-DD HH:mm:ss') }
+        const { carpark_id, client_type, vehicle_type, rate, total_lot, available_lot, remarks, user } = data
+        const item = { carpark_id, client_type, vehicle_type, rate, total_lot, available_lot, remarks, updated_by: user.username, updated_at: moment().format('YYYY-MM-DD HH:mm:ss') }
         await execute_query('create_item', item, 'season_rate', db)
         return true
     } catch (err) {
@@ -72,8 +68,8 @@ const add_season_rate = async data => {
 
 const modify_season_rate = async data => {
     try {
-        const { season_rate_id, client_type, vehicle_type, rate, remarks, status, user } = data
-        const condition = { client_type, vehicle_type, rate, remarks, status, updated_by: user.username, updated_at: moment().format('YYYY-MM-DD HH:mm:ss') }
+        const { season_rate_id, client_type, vehicle_type, rate, total_lot, available_lot, remarks, status, user } = data
+        const condition = { client_type, vehicle_type, rate, total_lot, available_lot, remarks, status, updated_by: user.username, updated_at: moment().format('YYYY-MM-DD HH:mm:ss') }
         await execute_query('update_item_by_id', { id: season_rate_id, condition }, 'season_rate', db)
         return true
     } catch (err) {

@@ -207,8 +207,12 @@ const set_auto_renew = async data => {
     try {
         const { season_id, auto_renew, user } = data
         if (!user.customer_id) throw new Error('Cannot set auto renew, there is no payment method saved')
-        const payment_method = await execute_query('get_item_by_condition', { where: { whereand: { customer_id: user.customer_id, is_default: true } } }, 'payment_method', db)
+        const [payment_method, carpark] = await Promise.all([
+            execute_query('get_item_by_condition', { where: { whereand: { customer_id: user.customer_id, is_default: true } } }, 'payment_method', db),
+            db.query(`select c.allow_auto_renew from season s left join carpark c using(carpark_id) where s.season_id = ${db.escape(season_id)} and c.allow_auto_renew = true`)
+        ])
         if (!payment_method || payment_method.length === 0) throw new Error('Cannot set auto renew, there is no payment method saved')
+        if (!carpark || carpark.length === 0) throw new Error('Auto renew is not allowed in this carpark')
         await execute_query('update_item_by_id', { condition: { auto_renew }, id: season_id }, 'season', db)
         return true
     } catch (err) {
