@@ -30,13 +30,11 @@ const create_season = async data => {
         let { renew, carpark_id, card_type, card_number, start_date, end_date, vehicle_number, vehicle_type, holder_id, holder_name, holder_company, holder_email, holder_contact_number, holder_address, holder_type, created_by } = data
       
         const item = { carpark_id, card_type, card_number, start_date, end_date, vehicle_number, vehicle_type, holder_id, holder_name, holder_company, holder_email, holder_contact_number, holder_address, holder_type, created_at: moment().format('YYYY-MM-DD HH:mm:ss'), updated_at: moment().format('YYYY-MM-DD HH:mm:ss'), created_by, updated_by: created_by }
-        const [season, carpark, season_rate] = await Promise.all([
-            execute_query('create_item', item, 'season', db),
+        const [carpark, season_rate] = await Promise.all([
             execute_query('get_item_by_condition', {where: {carpark_id}}, 'carpark', db),
             execute_query('get_item_by_condition', {where: {whereand: {carpark_id, vehicle_type, client_type: holder_type, status: 'ACTIVE'}}, limit: 1}, 'season_rate', db),
         ])
-        if (!season) throw new Error('create season fail')
-        else if (!carpark || carpark.length === 0) throw new Error('no carpark')
+        if (!carpark || carpark.length === 0) throw new Error('no carpark')
         else if (!season_rate || season_rate.length === 0) throw new Error('no season rate')
         const { carpark_name, carpark_code, address: carpark_address, postal_code } = carpark[0]
         const unit_price = season_rate[0].rate
@@ -45,6 +43,9 @@ const create_season = async data => {
         const quantity = +(firstPart + secondPart).toFixed(2)
         const amount = unit_price * quantity
         const description = `${renew ? 'Renew' : 'Purchase new'} season for ${quantity} ${quantity === 1 ? 'month' : 'months'}`
+        
+        const season = await execute_query('create_item', item, 'season', db)
+        if (!season) throw new Error('create season fail')
         const season_id = season.insertId
         return { ...item, unit_price, quantity, amount, description, season_id, carpark_name, carpark_code, carpark_address, postal_code, invoice_item: { unit_price, quantity, amount, description, season_id } }
     } catch(err) {
