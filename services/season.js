@@ -260,9 +260,9 @@ const auto_renew = async data => {
 const list_season = async data => {
     try {
         let { where, limit, offset, orderby, orderdirection, user } = data
-        where = where || { whereand: { buyer_id: user.user_id } }
-        where.whereand = where.whereand || { buyer_id: user.user_id }
-        where.whereand.buyer_id = user.user_id
+        where = where || { whereand: { holder_id: user.user_id } }
+        where.whereand = where.whereand || { holder_id: user.user_id }
+        where.whereand.holder_id = user.user_id
         const order = orderby ? `order by ${orderby} ${orderdirection || 'desc'}` : '';
         const limitation = limit === 'no' ? '' : `limit ${limit || '100'}`;
         const offsetion = offset ? `offset ${offset}` : '';
