@@ -46,6 +46,7 @@ const list_member = async data => {
         let { where, limit, offset, orderby, orderdirection, user } = data
         const { user_id } = user
         where = where || { whereand: { user_id } }
+        delete where.user_id
         where.whereand = where.whereand || { user_id }
         where.whereand.user_id = user_id
         const order = orderby ? `order by ${orderby} ${orderdirection || 'desc'}` : '';
@@ -86,8 +87,8 @@ const create_member_batch = async data => {
 
 const remove_member_batch = async data => {
     try {
-        const { files, user } = data
-        const resp = await Promise.all(files.map(f => execute_query('update_item_by_id', { where: { file_id: f.file_id }, condition: { status: 'INACTIVE' } })))
+        const { members, user } = data
+        const resp = await Promise.all(members.map(f => execute_query('update_item_by_id', { where: { member_id: f.member_id }, condition: { status: 'INACTIVE' } }, 'member', db)))
         return resp
     } catch (err) {
         return err
