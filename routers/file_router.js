@@ -10,7 +10,7 @@ file_router.use(fileUpload({
 }))
 
 file_router.route('/upload')
-.post(veryfy_user, async (req, res, next) => {
+.post(verify_user, async (req, res, next) => {
     try {
         console.log(req.body)
         if(!req.files) throw new Error('No file uploaded')
