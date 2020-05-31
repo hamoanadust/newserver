@@ -1,7 +1,7 @@
 const express = require('express')
 const fileUpload = require('express-fileupload')
 const file_router = express.Router()
-const file = require('../services/file')
+// const file = require('../services/file')
 const { verify_user, verify_admin } = require('../services/auth')
 
 file_router.use(fileUpload({
