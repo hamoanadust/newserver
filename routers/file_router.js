@@ -36,6 +36,8 @@ file_router.route('/download_file')
     try {
         const resp = await file.download_file(req.body.data)
         const { file_path, name } = resp
+        console.log('path', file_path)
+        console.log('name', name)
         res.download(file_path, name)
     } catch (err) {
         req.data = err
