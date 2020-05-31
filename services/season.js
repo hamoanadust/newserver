@@ -197,8 +197,11 @@ const add_season_by_admin = async data => {
         const holder_contact_number = holder[0].contact_number
         const holder_email = holder[0].email
         const created_by = user.username
+        console.log('created_by', created_by)
         const item = { carpark_id, start_date, end_date, card_number, vehicle_number, card_type, vehicle_type, holder_type, attn, holder_id, holder_name, holder_address, holder_company, holder_contact_number, holder_email, created_by }
-        return add_season_with_invoice(item)
+        const resp = await add_season_with_invoice(item)
+        console.log(resp)
+        return resp
     } catch (err) {
         return err
     }
@@ -207,6 +210,7 @@ const add_season_by_admin = async data => {
 const add_season_by_admin_batch = async data => {
     try {
         const resp = await Promise.all(data.map(e => add_season_by_admin(e)))
+        console.log(resp)
         return resp
     } catch (err) {
         return err
