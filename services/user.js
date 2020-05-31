@@ -113,7 +113,7 @@ const get_announcement = async data => {
             execute_query('get_item_by_condition', condition, 'announcement', db),
             execute_query('get_item_by_condition', { where: { user_id } }, 'user', db)
         ]) 
-        return userData[0].announcement_dismiss || !accouncement || annoucement.length === 0 ? [] : annoucement[0]
+        return userData[0].announcement_dismiss || !accouncement || announcement.length === 0 ? [] : announcement[0]
     } catch (err) {
         return err
     }
@@ -132,7 +132,8 @@ const dismiss_announcement = async data => {
 
 const create_announcement = async data => {
     try {
-        const { content, status } = data
+        let { content, status } = data
+        status = status || 'INACTIVE'
         let condition = { announcement_dismiss: false }
         const resp = await Promise.all([
             execute_query('create_item', { content, status }, 'announcement', db),
