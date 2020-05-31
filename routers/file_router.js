@@ -32,7 +32,7 @@ file_router.route('/list_file')
 })
 
 file_router.route('/download_file/:id')
-.get(verify_admin, async (req, res, next) => {
+.get(async (req, res, next) => {
     try {
         const file_id = req.params.id
         const resp = await file.download_file({ file_id })
