@@ -60,8 +60,18 @@ user_router.route('/update_profile')
     next()
 })
 
+user_router.route('/get_announcement')
+.post(verify_user, async (req, res, next) => {
+    req.body = req.body || {}
+    req.body.data = req.body.data || {}
+    req.body.data.user = req.user
+    req.data = await user.get_announcement(req.body.data)
+    next()
+})
+
 user_router.route('/dismiss_announcement')
 .post(verify_user, async (req, res, next) => {
+    req.body = req.body || {}
     req.body.data = req.body.data || {}
     req.body.data.user = req.user
     req.data = await user.dismiss_announcement(req.body.data)

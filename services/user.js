@@ -103,11 +103,27 @@ const update_profile = async data => {
     }
 }
 
+const get_announcement = async data => {
+    try {
+        const { user } = data
+        const { user_id } = user
+
+        const condition = { where: { status: 'ACTIVE' }, orderby: 'announcement_id', orderdirection: 'desc', limit: 1 }
+        const [accouncement, userData] = await Promise.all([
+            execute_query('get_item_by_condition', condition, 'announcement', db),
+            execute_query('get_item_by_condition', { where: { user_id } }, 'user', db)
+        ]) 
+        return userData[0].announcement_dismiss || !accouncement || annoucement.length === 0 ? [] : annoucement[0]
+    } catch (err) {
+        return err
+    }
+}
+
 const dismiss_announcement = async data => {
     try {
         const { user } = data
         let condition = { announcement_dismiss: true }
-        const resp = await execute_query('update_item_by_id', { id: user.user_id, condition }, 'user', db)
+        const resp = await execute_query('update_item_by_id', { id: user.user_id, condition }, 'announcement', db)
         return true
     } catch (err) {
         return err
@@ -116,9 +132,12 @@ const dismiss_announcement = async data => {
 
 const create_announcement = async data => {
     try {
-        const { content } = data
-        let condition = { announcement_dismiss: true }
-        const resp = await execute_query('create_item', { content }, 'announcement', db)
+        const { content, status } = data
+        let condition = { announcement_dismiss: false }
+        const resp = await Promise.all([
+            execute_query('create_item', { content, status }, 'announcement', db),
+            execute_query('update_item_by_id', { where: { announcement_dismiss: true }, condition }, 'user', db)
+        ])
         return true
     } catch (err) {
         return err
@@ -142,6 +161,7 @@ module.exports = {
     change_password,
     create_signup_otp,
     update_profile,
+    get_announcement,
     dismiss_announcement,
     create_announcement,
     update_announcement

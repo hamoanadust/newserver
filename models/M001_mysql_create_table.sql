@@ -206,7 +206,7 @@ CREATE TABLE IF NOT EXISTS payment_method (
 CREATE TABLE IF NOT EXISTS announcement (
     announcement_id SERIAL NOT NULL,
     content varchar(200),
-    status enum('ACTIVE', 'INACTIVE'),
+    status enum('ACTIVE', 'INACTIVE') not null default 'INACTIVE',
     created_at datetime,
     updated_at datetime,
     CONSTRAINT announcement_id_pk PRIMARY KEY(announcement_id)
