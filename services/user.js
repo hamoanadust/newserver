@@ -107,7 +107,7 @@ const list_user_for_admin = async data => {
     try {
         let { where, limit, offset, orderby, orderdirection } = data
         where = where || { user_id: { gt: 0 } }
-        const fields = ['username', 'name', 'email', 'company', 'contact_number', 'role', 'customer_id', 'announcement_dismiss', 'created_at', 'updated_at']
+        const fields = ['username', 'name', 'email', 'company', 'contact_number', 'role', 'customer_id', 'announcement_dismiss', 'created_at', 'created_by']
         const user = await execute_query('get_item_by_condition', { fields, where, limit, offset, orderby, orderdirection }, 'user', db)
         return user
     } catch (err) {
