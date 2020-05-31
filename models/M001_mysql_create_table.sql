@@ -14,6 +14,7 @@ customer_id BIGINT,
 created_at datetime,
 created_by varchar(20),
 password varchar(200),
+announcement_dismiss boolean,
 CONSTRAINT user_id_pk PRIMARY KEY(user_id)
 );
 
@@ -186,8 +187,6 @@ CREATE TABLE IF NOT EXISTS transaction (
     CONSTRAINT transaction_id_pk PRIMARY KEY(transaction_id)
 );
 
-
-
 CREATE TABLE IF NOT EXISTS payment_method (
     payment_method_id SERIAL NOT NULL,
     customer_id int,
@@ -203,6 +202,15 @@ CREATE TABLE IF NOT EXISTS payment_method (
     CONSTRAINT payment_method_id_pk PRIMARY KEY(payment_method_id)
 );
 
+
+CREATE TABLE IF NOT EXISTS announcement (
+    announcement_id SERIAL NOT NULL,
+    content varchar(200),
+    status enum('ACTIVE', 'INACTIVE'),
+    created_at datetime,
+    updated_at datetime,
+    CONSTRAINT announcement_id_pk PRIMARY KEY(announcement_id)
+);
 
 insert into iu_type (initial_number, vehicle_type) values
 ('{001, 002, 003, 004}', 'FREE'),

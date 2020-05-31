@@ -60,6 +60,28 @@ user_router.route('/update_profile')
     next()
 })
 
+user_router.route('/dismiss_announcement')
+.post(verify_user, async (req, res, next) => {
+    req.body.data = req.body.data || {}
+    req.body.data.user = req.user
+    req.data = await user.dismiss_announcement(req.body.data)
+    next()
+})
+
+user_router.route('/create_announcement')
+.post(verify_admin, async (req, res, next) => {
+    req.body.data.user = req.user
+    req.data = await user.create_announcement(req.body.data)
+    next()
+})
+
+user_router.route('/update_announcement')
+.post(verify_admin, async (req, res, next) => {
+    req.body.data.user = req.user
+    req.data = await user.update_announcement(req.body.data)
+    next()
+})
+
 // user_router.route('/get_access_control')
 // .post(verify_user, async (req, res, next) => {
 //     let data = { ...req.body.data, user: req.user }

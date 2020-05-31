@@ -103,10 +103,46 @@ const update_profile = async data => {
     }
 }
 
+const dismiss_announcement = async data => {
+    try {
+        const { user } = data
+        let condition = { announcement_dismiss: true }
+        const resp = await execute_query('update_item_by_id', { id: user.user_id, condition }, 'user', db)
+        return true
+    } catch (err) {
+        return err
+    }
+}
+
+const create_announcement = async data => {
+    try {
+        const { content } = data
+        let condition = { announcement_dismiss: true }
+        const resp = await execute_query('create_item', { content }, 'announcement', db)
+        return true
+    } catch (err) {
+        return err
+    }
+}
+
+const update_announcement = async data => {
+    try {
+        const { announcement_id, status, content } = data
+        let condition = { status, content }
+        const resp = await execute_query('update_item_by_id', { id: announcement_id, condition }, 'announcement', db)
+        return true
+    } catch (err) {
+        return err
+    }
+}
+
 module.exports = {
     signup,
     signin,
     change_password,
     create_signup_otp,
-    update_profile
+    update_profile,
+    dismiss_announcement,
+    create_announcement,
+    update_announcement
 }
