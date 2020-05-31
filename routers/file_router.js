@@ -18,7 +18,7 @@ file_router.route('/upload')
         console.log(file.name)
         const arr = file.name.split('_')
         console.log(arr)
-        file.mv(`./${arr[0]}/${req.user.user_id}/${arr[1]}`)
+        file.mv(`./uploads/${arr[0]}/${req.user.user_id}/${arr[1]}`)
         req.data = {
             name: file.name,
             mimetype: file.mimetype,
