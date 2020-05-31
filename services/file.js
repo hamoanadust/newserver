@@ -8,6 +8,12 @@ const upload = data => {
         const { file } = files
         const { user_id } = user
         const { carpark_id } = body
+        const carpark_exist = fs.existsSync(path.join(__dirname, `/../uploads/${carpark_id}`))
+        if (!carpark_exist) {
+            console.log(path.join(__dirname, `/../uploads/${carpark_id}`))
+            fs.mkdirSync(path.join(__dirname, `/../uploads/${carpark_id}`), { recursive: true })
+            console.log('mkdir', `./uploads/${carpark_id}/${user_id}`)
+        }
         const exist = fs.existsSync(path.join(__dirname, `/../uploads/${carpark_id}/${user_id}`))
         if (!exist) {
             console.log(path.join(__dirname, `/../uploads/${carpark_id}/${user_id}`))
