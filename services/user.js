@@ -109,11 +109,11 @@ const get_announcement = async data => {
         const { user_id } = user
 
         const condition = { where: { status: 'ACTIVE' }, orderby: 'announcement_id', orderdirection: 'desc', limit: 1 }
-        const [accouncement, userData] = await Promise.all([
+        const [announcement, userData] = await Promise.all([
             execute_query('get_item_by_condition', condition, 'announcement', db),
             execute_query('get_item_by_condition', { where: { user_id } }, 'user', db)
         ]) 
-        return userData[0].announcement_dismiss || !accouncement || announcement.length === 0 ? [] : announcement[0]
+        return userData[0].announcement_dismiss || !announcement || announcement.length === 0 ? [] : announcement[0]
     } catch (err) {
         return err
     }
