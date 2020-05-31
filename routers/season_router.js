@@ -25,6 +25,17 @@ season_router.route('/add_season_by_admin')
     }
 })
 
+season_router.route('/add_season_by_admin_batch')
+.post(verify_admin, async (req, res, next) => {
+    try {
+        req.body.data.user = req.user
+        req.data = await season.add_season_by_admin_batch(req.body.data)
+        next()
+    } catch (err) {
+        throw err
+    }
+})
+
 season_router.route('/add_season_with_invoice')
 .post(pass_user, async (req, res, next) => {
     try {

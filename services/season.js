@@ -92,7 +92,7 @@ const create_invoice = async data => {
 const add_season_with_invoice = async data => {
     try {
         let { carpark_id, card_number, start_date, end_date, //required
-            card_type, vehicle_type, holder_type, attn, vehicle_id, //optional with a default value
+            card_type, vehicle_type, holder_type, attn, vehicle_id, created_by,  //optional with a default value
             vehicle_number, holder_id, holder_name, holder_company, holder_address, holder_contact_number, holder_email,//optional
             user } = data//from middleware
         if (!carpark_id) throw new Error('no carpark id')
@@ -123,7 +123,7 @@ const add_season_with_invoice = async data => {
         holder_address = holder_address || (holder ? holder.address : undefined) || (user ? user.address : '')
         holder_contact_number = holder_contact_number || (holder ? holder.contact_number : undefined) || (user ? user.contact_number : '')
         holder_email = holder_email || (holder ? holder.email : undefined) || (user ? user.email : '')
-        const created_by = holder_name
+        created_by = created_by || holder_name
         const season_data = { carpark_id, card_number, start_date, end_date, card_type, vehicle_type, holder_type, vehicle_number, holder_id, holder_name, holder_company, holder_address, holder_contact_number, holder_email, created_by }
         const season = await create_season(season_data)
         if (!season) throw new Error('create season fail')
@@ -199,6 +199,14 @@ const add_season_by_admin = async data => {
         const created_by = user.username
         const item = { carpark_id, start_date, end_date, card_number, vehicle_number, card_type, vehicle_type, holder_type, attn, holder_id, holder_name, holder_address, holder_company, holder_contact_number, holder_email, created_by }
         return add_season_with_invoice(item)
+    } catch (err) {
+        return err
+    }
+}
+
+const add_season_by_admin_batch = async data => {
+    try {
+        return Promise.all(data.map(e => add_season_by_admin(e)))
     } catch (err) {
         return err
     }
@@ -317,6 +325,7 @@ const terminate_season = async data => {
 module.exports = {
     find_season,
     add_season_by_admin,
+    add_season_by_admin_batch,
     add_season_with_invoice,
     renew_season_with_invoice,
     list_all_season,
