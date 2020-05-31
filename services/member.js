@@ -2,16 +2,27 @@ const db = require('./db')
 const moment = require('moment')
 const { execute_query, prepare_where } = require('./dao')
 
-const apply_member = async data => {
+const create_member = async data => {
     try {
-        let { file_id, status } = data
+        let { file_id, user_id, status } = data
         status = status || 'INACTIVE'
-        const resp = await execute_query('get_item_by_condition', { where: { file_id } }, 'file', db)
+        const condition = user_id ? { where: { whereand: { file_id, user_id } } } : { where: { file_id } }
+        const resp = await execute_query('get_item_by_condition', condition, 'file', db)
         if (!resp || resp.length === 0) throw new Error('file not found')
         const { user_id, carpark_id } = resp[0]
-        const item = { file_id, user_id, carpark_id, status: 'INACTIVE', created_at: moment().format('YYYY-MM-DD HH:mm:ss'), updated_at: moment().format('YYYY-MM-DD HH:mm:ss') }
+        const item = { file_id, user_id, carpark_id, status, created_at: moment().format('YYYY-MM-DD HH:mm:ss'), updated_at: moment().format('YYYY-MM-DD HH:mm:ss') }
         const member = await execute_query('create_item', item, 'member', db)
         return { ...item, member_id: member.insertId }
+    } catch (err) {
+        return err
+    }
+}
+
+const apply_member = async data => {
+    try {
+        const { file_id, user } = data
+        const { user_id } = user
+        return create_member({ file_id, user_id })
     } catch (err) {
         return err
     }
@@ -65,7 +76,7 @@ const list_member_for_admin = async data => {
 const create_member_batch = async data => {
     try {
         const { files, user } = data
-        const resp = await Promise.all(files.map(f => apply_member({ file_id: f.file_id, status: 'ACTIVE' })))
+        const resp = await Promise.all(files.map(f => create_member({ file_id: f.file_id, status: 'ACTIVE' })))
         return resp
     } catch (err) {
         return err
