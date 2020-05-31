@@ -37,7 +37,7 @@ app.get('/success', (req, res, next) => {
 app.get('/error', () => { 
   throw(new Error('test error')) 
 })
-app.use('/bt', announcement_router)
+app.use('/announcement', announcement_router)
 app.use('/bt', braintree_router)
 app.use('/carpark', carpark_router)
 app.use('/invoice', invoice_router)
