@@ -9,6 +9,7 @@ const upload_file = async data => {
     try {
         const { files, user, body } = data
         if(!files) throw new Error('No file uploaded')
+        if(!body || !body.carpark_id) throw new Error('carpark_id is required')
         const { file } = files
         const { user_id } = user
         let { carpark_id, file_type } = body

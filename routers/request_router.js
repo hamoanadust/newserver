@@ -26,6 +26,18 @@ request_router.route('/list_request')
     }
 })
 
+request_router.route('/list_request_for_admin')
+.post(verify_admin, async (req, res, next) => {
+    try {
+        req.body.data.user = req.user
+        req.data = await request.list_request_for_admin(req.body.data)
+        next()
+    } catch (err) {
+        req.data = err
+        next()
+    }
+})
+
 request_router.route('/add_request')
 .post(verify_user, async (req, res, next) => {
     try {

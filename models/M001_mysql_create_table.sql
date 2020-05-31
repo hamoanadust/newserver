@@ -227,6 +227,17 @@ CREATE TABLE IF NOT EXISTS file (
     CONSTRAINT file_id_pk PRIMARY KEY(file_id)
 );
 
+CREATE TABLE IF NOT EXISTS member (
+    member_id SERIAL NOT NULL,
+    carpark_id int,
+    user_id int,
+    file_id int,
+    status enum('ACTIVE', 'INACTIVE') not null default 'INACTIVE',
+    created_at datetime,
+    updated_at datetime,
+    CONSTRAINT member_id_pk PRIMARY KEY(member_id)
+);
+
 insert into iu_type (initial_number, vehicle_type) values
 ('{001, 002, 003, 004}', 'FREE'),
 ('{071, 072, 073, 074, 075, 076, 077}', 'MOTORCYCLE'),

@@ -25,6 +25,16 @@ const list_request = data => {
     }
 }
 
+const list_request_for_admin = data => {
+    try {
+        let { where, limit, offset, orderby, orderdirection } = data
+        const condition = { where, limit, offset, orderby, orderdirection }
+        return execute_query('get_item_by_condition', condition, 'request', db)
+    } catch (err) {
+        return err
+    }
+}
+
 const add_request = async data => {
     try {
         const { request_type, season_id, vehicle_number, card_type, card_number, recurring_billing, remarks, effective_datetime, user } = data
@@ -112,6 +122,7 @@ const execute_request = {
 module.exports = {
     list_all_request,
     list_request,
+    list_request_for_admin,
     add_request,
     change_request_status,
     change_request_status_by_admin,

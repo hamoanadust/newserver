@@ -60,6 +60,13 @@ user_router.route('/update_profile')
     next()
 })
 
+user_router.route('/list_user_for_admin')
+.post(verify_admin, async (req, res, next) => {
+    req.body.data.user = req.user
+    req.data = await user.list_user_for_admin(req.body.data)
+    next()
+})
+
 module.exports = {
     user_router
 }
