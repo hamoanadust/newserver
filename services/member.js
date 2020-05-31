@@ -9,7 +9,8 @@ const create_member = async data => {
         const condition = user_id ? { where: { whereand: { file_id, user_id } } } : { where: { file_id } }
         const resp = await execute_query('get_item_by_condition', condition, 'file', db)
         if (!resp || resp.length === 0) throw new Error('file not found')
-        const { user_id, carpark_id } = resp[0]
+        const { carpark_id } = resp[0]
+        user_id = user_id || resp[0].user_id
         const item = { file_id, user_id, carpark_id, status, created_at: moment().format('YYYY-MM-DD HH:mm:ss'), updated_at: moment().format('YYYY-MM-DD HH:mm:ss') }
         const member = await execute_query('create_item', item, 'member', db)
         return { ...item, member_id: member.insertId }
