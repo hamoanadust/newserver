@@ -202,7 +202,6 @@ CREATE TABLE IF NOT EXISTS payment_method (
     CONSTRAINT payment_method_id_pk PRIMARY KEY(payment_method_id)
 );
 
-
 CREATE TABLE IF NOT EXISTS announcement (
     announcement_id SERIAL NOT NULL,
     content varchar(200),
@@ -210,6 +209,22 @@ CREATE TABLE IF NOT EXISTS announcement (
     created_at datetime,
     updated_at datetime,
     CONSTRAINT announcement_id_pk PRIMARY KEY(announcement_id)
+);
+
+CREATE TABLE IF NOT EXISTS file (
+    file_id SERIAL NOT NULL,
+    carpark_id int,
+    user_id int,
+    file_type enum('TENANT_FILE') not null default 'TENANT_FILE',
+    name varchar(20),
+    file_name varchar(26),
+    mimetype varchar(20),
+    size bigint,
+    file_path varchar(100),
+    status enum('ACTIVE', 'INACTIVE') not null default 'ACTIVE',
+    created_at datetime,
+    updated_at datetime,
+    CONSTRAINT file_id_pk PRIMARY KEY(file_id)
 );
 
 insert into iu_type (initial_number, vehicle_type) values

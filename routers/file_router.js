@@ -9,11 +9,23 @@ file_router.use(fileUpload({
     limits: { fileSize: 2 * 1024 * 1024 * 1024 },
 }))
 
-file_router.route('/upload')
+file_router.route('/upload_file')
 .post(verify_user, async (req, res, next) => {
     try {
-        req.data = await file.upload(req)
+        req.data = await file.upload_file(req)
         next()
+    } catch (err) {
+        req.data = err
+        next()
+    }
+})
+
+file_router.route('/download_file')
+.post(verify_admin, async (req, res, next) => {
+    try {
+        const file = await file.download_file(req.body.data)
+        const { file_path, name } = file
+        res.download(file_path, name)
     } catch (err) {
         req.data = err
         next()
