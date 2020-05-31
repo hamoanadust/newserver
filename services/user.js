@@ -123,7 +123,7 @@ const dismiss_announcement = async data => {
     try {
         const { user } = data
         let condition = { announcement_dismiss: true }
-        const resp = await execute_query('update_item_by_id', { id: user.user_id, condition }, 'announcement', db)
+        const resp = await execute_query('update_item_by_id', { id: user.user_id, condition }, 'user', db)
         return true
     } catch (err) {
         return err
