@@ -1,6 +1,6 @@
 const fs = require('fs')
 const path = require("path")
-const { generate_random_integer } = require('tool')
+const { generate_random_integer } = require('./tool')
 const db = require('./db')
 const { execute_query, prepare_where } = require('./dao')
 const moment = require('moment')
