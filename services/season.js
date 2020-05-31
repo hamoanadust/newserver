@@ -209,7 +209,8 @@ const add_season_by_admin = async data => {
 
 const add_season_by_admin_batch = async data => {
     try {
-        const resp = await Promise.all(data.map(e => add_season_by_admin(e)))
+        const { seasons, user } = data
+        const resp = await Promise.all(seasons.map(e => add_season_by_admin({ ...e, user })))
         console.log(resp)
         return resp
     } catch (err) {
