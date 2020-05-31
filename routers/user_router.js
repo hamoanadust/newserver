@@ -78,17 +78,31 @@ user_router.route('/dismiss_announcement')
     next()
 })
 
-user_router.route('/create_announcement')
+user_router.route('/create_announcement_active')
 .post(verify_admin, async (req, res, next) => {
     req.body.data.user = req.user
-    req.data = await user.create_announcement(req.body.data)
+    req.data = await user.create_announcement_active(req.body.data)
     next()
 })
 
-user_router.route('/update_announcement')
+user_router.route('/create_announcement_inactive')
 .post(verify_admin, async (req, res, next) => {
     req.body.data.user = req.user
-    req.data = await user.update_announcement(req.body.data)
+    req.data = await user.create_announcement_inactive(req.body.data)
+    next()
+})
+
+user_router.route('/active_announcement')
+.post(verify_admin, async (req, res, next) => {
+    req.body.data.user = req.user
+    req.data = await user.active_announcement(req.body.data)
+    next()
+})
+
+user_router.route('/inactive_announcement')
+.post(verify_admin, async (req, res, next) => {
+    req.body.data.user = req.user
+    req.data = await user.inactive_announcement(req.body.data)
     next()
 })
 

@@ -130,26 +130,46 @@ const dismiss_announcement = async data => {
     }
 }
 
-const create_announcement = async data => {
+const create_announcement_inactive = async data => {
     try {
-        let { content, status } = data
-        status = status || 'INACTIVE'
-        let condition = { announcement_dismiss: false }
-        const resp = await Promise.all([
-            execute_query('create_item', { content, status }, 'announcement', db),
-            execute_query('update_item_by_id', { where: { announcement_dismiss: true }, condition }, 'user', db)
+        const { content } = data
+        const announcement = await execute_query('create_item', { content }, 'announcement', db)
+        return { announcement_id: announcement.insertId }
+    } catch (err) {
+        return err
+    }
+}
+
+const create_announcement_active = async data => {
+    try {
+        const { content } = data
+        const announcement = await create_announcement_inactive({ content })
+        const { announcement_id } = announcement
+        const activation = await active_announcement({ announcement_id })
+        return activation
+    } catch (err) {
+        return err
+    }
+}
+
+const active_announcement = async data => {
+    try {
+        const { announcement_id } = data
+        await Promise.all([
+            execute_query('update_item_by_id', { where: { status: 'ACTIVE' }, condition: { status: 'INACTIVE' } }, 'announcement', db),
+            execute_query('update_item_by_id', { where: { announcement_dismiss: true }, condition: { announcement_dismiss: false } }, 'user', db)
         ])
+        const resp = await execute_query('update_item_by_id', { id: announcement_id, condition: { status: 'ACTIVE' } }, 'announcement', db)
         return true
     } catch (err) {
         return err
     }
 }
 
-const update_announcement = async data => {
+const inactive_announcement = async data => {
     try {
-        const { announcement_id, status, content } = data
-        let condition = { status, content }
-        const resp = await execute_query('update_item_by_id', { id: announcement_id, condition }, 'announcement', db)
+        const { announcement_id } = data
+        const resp = await execute_query('update_item_by_id', { id: announcement_id, condition: { status: 'INACTIVE' } }, 'announcement', db)
         return true
     } catch (err) {
         return err
@@ -164,6 +184,8 @@ module.exports = {
     update_profile,
     get_announcement,
     dismiss_announcement,
-    create_announcement,
-    update_announcement
+    create_announcement_inactive,
+    create_announcement_active,
+    active_announcement,
+    inactive_announcement
 }
