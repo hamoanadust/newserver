@@ -101,8 +101,6 @@ const add_season_with_invoice = async data => {
         else if (!end_date) throw new Error('no end date')
         else if (moment(start_date).isAfter(moment(end_date))) throw new Error('start date is after end date')
         else if (moment(end_date).endOf('month').format('YYYY-MM-DD')!==moment(end_date).format('YYYY-MM-DD')) {
-            console.log(moment(end_date).endOf('month').format('YYYY-MM-DD'))
-            console.log(moment(end_date).format('YYYY-MM-DD'))
             throw new Error('end date must be end of month')
         } else if (moment(start_date).date() >= 15 && moment(end_date).diff(moment(start_date), 'month') < 1) {
             throw new Error('start date after 15, end date must be at least the end of the next month')
@@ -197,10 +195,8 @@ const add_season_by_admin = async data => {
         const holder_contact_number = holder[0].contact_number
         const holder_email = holder[0].email
         const created_by = user.username
-        console.log('created_by', created_by)
         const item = { carpark_id, start_date, end_date, card_number, vehicle_number, card_type, vehicle_type, holder_type, attn, holder_id, holder_name, holder_address, holder_company, holder_contact_number, holder_email, created_by }
         const resp = await add_season_with_invoice(item)
-        console.log(resp)
         return resp
     } catch (err) {
         return err
@@ -211,8 +207,9 @@ const add_season_by_admin_batch = async data => {
     try {
         const { seasons, user } = data
         const resp = await Promise.all(seasons.map(e => add_season_by_admin({ ...e, user })))
-        console.log(resp)
-        return resp
+        return resp.map(e => { 
+            return e instanceof Error ? { error: e } : e
+        })
     } catch (err) {
         return err
     }
