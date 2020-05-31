@@ -55,6 +55,7 @@ const download_file = async data => {
         if (!resp || resp.length === 0) throw new Error('file not found')
         const { name, file_name, file_path } = resp[0]
         console.log(name, file_name, file_path)
+        console.log(file_path, 'exists', fs.existsSync(file_path))
         return { name, file_name, file_path }
     } catch(err) {
         return err
