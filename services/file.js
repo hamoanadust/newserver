@@ -1,4 +1,5 @@
 const fs = require('fs')
+const path = require("path")
 
 const upload = data => {
     try {
@@ -7,10 +8,11 @@ const upload = data => {
         const { file } = files
         const { user_id } = user
         const { carpark_id } = body
-        const exist = fs.existsSync(`./uploads/${carpark_id}/${user_id}`)
+        const exist = fs.existsSync(path.join(__dirname, `/../uploads/${carpark_id}/${user_id}`))
         if (!exist) {
+            console.log(path.join(__dirname, `/../uploads/${carpark_id}/${user_id}`))
+            fs.mkdirSync(path.join(__dirname, `/../uploads/${carpark_id}/${user_id}`))
             console.log('mkdir', `./uploads/${carpark_id}/${user_id}`)
-            fs.mkdirSync(`./uploads/${carpark_id}/${user_id}`)
         }
         file.mv(`./uploads/${carpark_id}/${user_id}/${file.name}`)
         return {
