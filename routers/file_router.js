@@ -20,11 +20,22 @@ file_router.route('/upload_file')
     }
 })
 
+file_router.route('/list_file')
+.post(verify_admin, async (req, res, next) => {
+    try {
+        req.data = await file.list_file(req.body.data)
+        next()
+    } catch (err) {
+        req.data = err
+        next()
+    }
+})
+
 file_router.route('/download_file')
 .post(verify_admin, async (req, res, next) => {
     try {
-        const file = await file.download_file(req.body.data)
-        const { file_path, name } = file
+        const resp = await file.download_file(req.body.data)
+        const { file_path, name } = resp
         res.download(file_path, name)
     } catch (err) {
         req.data = err
