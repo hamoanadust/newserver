@@ -18,7 +18,7 @@ const upload_file = async data => {
         if (!fs.existsSync(path.join(__dirname, `/../uploads/${carpark_id}`))) fs.mkdirSync(path.join(__dirname, `/../uploads/${carpark_id}`), { recursive: true })
         if (!fs.existsSync(path.join(__dirname, `/../uploads/${carpark_id}/${user_id}`))) fs.mkdirSync(path.join(__dirname, `/../uploads/${carpark_id}/${user_id}`), { recursive: true })
         const file_name = `${name}${generate_random_integer()}`
-        const file_path = path.join(__dirname, `/../uploads/${carpark_id}/${user_id}`) + file_name
+        const file_path = path.join(__dirname, `/../uploads/${carpark_id}/${user_id}/`) + file_name
         file.mv(`./uploads/${carpark_id}/${user_id}/${file_name}`)
         const createFile = await create_file({ file_name, name, mimetype, size, carpark_id, user_id, file_path, file_type })
         return createFile
@@ -54,8 +54,6 @@ const download_file = async data => {
         const resp = await execute_query('get_item_by_condition', { where: { file_id } }, 'file', db)
         if (!resp || resp.length === 0) throw new Error('file not found')
         const { name, file_name, file_path } = resp[0]
-        console.log(name, file_name, file_path)
-        console.log(file_path, 'exists', fs.existsSync(file_path))
         return { name, file_name, file_path }
     } catch(err) {
         return err
