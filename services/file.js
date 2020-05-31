@@ -10,7 +10,7 @@ const upload = data => {
         const exist = fs.existsSync(`./uploads/${carpark_id}/${user_id}`)
         if (!exist) {
             console.log('mkdir', `./uploads/${carpark_id}/${user_id}`)
-            fs.mkdir(`./uploads/${carpark_id}/${user_id}`)
+            fs.mkdirSync(`./uploads/${carpark_id}/${user_id}`)
         }
         file.mv(`./uploads/${carpark_id}/${user_id}/${file.name}`)
         return {
