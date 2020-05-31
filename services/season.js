@@ -187,7 +187,18 @@ const renew_season_batch = async data => {
 
 const add_season_by_admin = async data => {
     try {
-        return 'under development'
+        const { carpark_id, start_date, end_date, card_number, vehicle_number, card_type, vehicle_type, holder_type, attn, user_id, user } = data
+        const holder = await execute_query('get_item_by_condition', { where: { user_id }, limit: 1 }, 'user', db)
+        if (!holder && holder.length === 0) throw new Error('user not found')
+        const holder_id = user_id
+        const holder_name = holder[0].name
+        const holder_address = holder[0].address
+        const holder_company = holder[0].company
+        const holder_contact_number = holder[0].contact_number
+        const holder_email = holder[0].email
+        const created_by = user.username
+        const item = { carpark_id, start_date, end_date, card_number, vehicle_number, card_type, vehicle_type, holder_type, attn, holder_id, holder_name, holder_address, holder_company, holder_contact_number, holder_email, created_by }
+        return add_season_with_invoice(item)
     } catch (err) {
         return err
     }
