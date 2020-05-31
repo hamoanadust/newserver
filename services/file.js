@@ -27,7 +27,7 @@ const upload_file = async data => {
     }
 }
 
-const create_file = data => {
+const create_file = async data => {
     try {
         const { file_name, name, mimetype, size, carpark_id, user_id, file_path, file_type } = data
         const item = { file_name, name, mimetype, size, carpark_id, user_id, file_path, file_type, status: 'ACTIVE', created_at: moment().format('YYYY-MM-DD HH:mm:ss'), updated_at: moment().format('YYYY-MM-DD HH:mm:ss') }
@@ -38,7 +38,7 @@ const create_file = data => {
     }
 }
 
-const list_file = data => {
+const list_file = async data => {
     try {
         const { where, limit, offset, orderby, orderdirection } = data
         const files = await execute_query('get_item_by_condition', { where, limit, offset, orderby, orderdirection }, 'file', db)
@@ -48,7 +48,7 @@ const list_file = data => {
     }
 }
 
-const download_file = data => {
+const download_file = async data => {
     try {
         const { file_id } = data
         const resp = await execute_query('get_item_by_condition', { where: { file_id } }, 'file', db)
