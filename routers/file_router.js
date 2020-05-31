@@ -31,11 +31,10 @@ file_router.route('/list_file')
     }
 })
 
-file_router.route('/download_file/:id')
-.get(async (req, res, next) => {
+file_router.route('/download_file')
+.post(verify_admin, async (req, res, next) => {
     try {
-        const file_id = req.params.id
-        const resp = await file.download_file({ file_id })
+        const resp = await file.download_file(req.body.data)
         const { file_path, name } = resp
         res.download(file_path, name)
     } catch (err) {
