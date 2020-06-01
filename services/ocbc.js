@@ -1,29 +1,22 @@
-const request = require('request');
-const { chatapi } = require('../config/config.json');
+const fetch = require('node-fetch')
 
 const execute_command = req => {
-    return new Promise((resolve, reject) => {
-        request(req, (err, resp) => {
-            if (err) reject(err);
-            resolve(resp.body);
-        })
-    })
+    const { url, method, json } = req
+    console.log(req)
+    return fetch(url, { method, body: JSON.stringify(json), headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer 82e8f0db39251223929e43c7e0a235b3' } }).then(res => res.json())
 }
 
-const req = {
-    url,
-    method,
-    json: { chatId, phone, body }
-}
 
-let api = {}
-api.payNowQR = data => {
+const paynow_qr = data => {
     const { ExpiryDate, ReferenceText, Amount, QRCodeSize, ProxyType, ProxyValue } = data
-    const params = { ExpiryDate, ReferenceText, Amount, QRCodeSize, ProxyType, ProxyValue }
-    const url = 'https://api.ocbc.com:8243/transactional/paynowqr/1.0/payNowQR'
-
+    const req = {
+        url: 'https://api.ocbc.com:8243/transactional/paynowqr/1.0/payNowQR',
+        method: 'POST',
+        json: { ExpiryDate, ReferenceText, Amount, QRCodeSize, ProxyType, ProxyValue }
+    }
+    return execute_command(req)
 }
 
 module.exports = {
-
+    paynow_qr
 }
