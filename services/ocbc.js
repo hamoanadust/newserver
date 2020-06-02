@@ -6,7 +6,6 @@ const execute_command = req => {
     return fetch(url, { method, body: JSON.stringify(json), headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer 82e8f0db39251223929e43c7e0a235b3' } }).then(res => res.json())
 }
 
-
 const paynow_qr = data => {
     const { ExpiryDate, ReferenceText, Amount, QRCodeSize, ProxyType, ProxyValue } = data
     const req = {
@@ -17,6 +16,12 @@ const paynow_qr = data => {
     return execute_command(req)
 }
 
+const callback = data => {
+    console.log(data)
+    return data
+}
+
 module.exports = {
-    paynow_qr
+    paynow_qr,
+    callback
 }

@@ -9,8 +9,29 @@ ocbc_router.use(bodyParser.json())
 ocbc_router.route('/paynow_qr')
 .post(async (req, res, next) => {
     try {
-        req.body.data.user = req.user
         req.data = await ocbc.paynow_qr(req.body.data)
+        next()
+    } catch (err) {
+        req.data = err
+        next()
+    }
+})
+
+ocbc_router.route('/callback')
+.get(async (req, res, next) => {
+    try {
+        req.data = await ocbc.callback(req.body)
+        console.log('GET')
+        next()
+    } catch (err) {
+        req.data = err
+        next()
+    }
+})
+.post(async (req, res, next) => {
+    try {
+        console.log('POST')
+        req.data = await ocbc.callback(req.body)
         next()
     } catch (err) {
         req.data = err
