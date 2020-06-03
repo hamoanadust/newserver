@@ -55,7 +55,16 @@ file_router.route('/download_giro_form')
     }
 })
 
-
+file_router.route('/upload_file_for_admin')
+.post(verify_admin, async (req, res, next) => {
+    try {
+        req.data = await file.upload_file_for_admin(req.body.data)
+        next()
+    } catch (err) {
+        req.data = err
+        next()
+    }
+})
 
 module.exports = {
     file_router

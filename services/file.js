@@ -5,7 +5,7 @@ const db = require('./db')
 const { execute_query, prepare_where } = require('./dao')
 const moment = require('moment')
 
-const upload_file = async data => {
+const upload = async data => {
     try {
         const { files, user, body } = data
         if(!files) throw new Error('No file uploaded')
@@ -24,9 +24,28 @@ const upload_file = async data => {
         const createFile = await create_file({ file_name, name, mimetype, size, carpark_id, user_id, file_path, file_type })
         return createFile
     } catch(err) {
+        throw err
+    }
+}
+
+const upload_file = async data => {
+    try {
+        let { files, user, body } = data
+        body.file_type = 'TENANT_FILE'
+        return upload({ files, user, body })
+    } catch(err) {
         return err
     }
 }
+
+const upload_file_for_admin = async data => {
+    try {
+        return upload(data)
+    } catch(err) {
+        return err
+    }
+}
+
 
 const create_file = async data => {
     try {
@@ -77,5 +96,6 @@ module.exports = {
     upload_file,
     list_file,
     download_file,
-    download_giro_form
+    download_giro_form,
+    upload_file_for_admin
 }

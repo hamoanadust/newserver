@@ -223,7 +223,7 @@ const add_season_by_admin_batch = async data => {
 const list_all_season = async data => {
     try {
         const { holder_id } = data
-        const sql = `select s.*, c.carpark_name, c.carpark_code, c.address, c.postal_code, c.public_policy, c.billing_method, c.allow_giro, c.allow_auto_renew, c.status as carpark_status, c.remarks, item.invoice_item_id, item.unit_price, item.quantity, item.amount, item.invoice_id, item.description, item.* from season s left join carpark c using(carpark_id) left join invoice_item item using (season_id) where s.holder_id = ${db.escape(holder_id)} and s.status in ('NEW', 'ACTIVE')`
+        const sql = `select s.*, c.carpark_name, c.carpark_code, c.address, c.postal_code, c.public_policy, c.billing_method, c.allow_giro, c.allow_auto_renew, c.status as carpark_status, c.remarks, c.giro_form_id, item.invoice_item_id, item.unit_price, item.quantity, item.amount, item.invoice_id, item.description, item.* from season s left join carpark c using(carpark_id) left join invoice_item item using (season_id) where s.holder_id = ${db.escape(holder_id)} and s.status in ('NEW', 'ACTIVE')`
         const season = await db.query(sql)
         return season
     } catch (err) {
@@ -293,7 +293,7 @@ const list_season = async data => {
         const order = orderby ? `order by ${orderby} ${orderdirection || 'desc'}` : '';
         const limitation = limit === 'no' ? '' : `limit ${limit || '100'}`;
         const offsetion = offset ? `offset ${offset}` : '';
-        const sql = `select s.*, c.carpark_name, c.carpark_code, c.address, c.postal_code, c.public_policy, c.billing_method, c.allow_giro, c.allow_auto_renew, c.status as carpark_status, c.remarks, item.invoice_item_id, item.unit_price, item.quantity, item.amount, item.invoice_id, item.description, item.* from season s left join carpark c using(carpark_id) left join invoice_item item using (season_id) where ${prepare_where(where, db)} ${order} ${limitation} ${offsetion}`
+        const sql = `select s.*, c.carpark_name, c.carpark_code, c.address, c.postal_code, c.public_policy, c.billing_method, c.allow_giro, c.allow_auto_renew, c.status as carpark_status, c.remarks, c.giro_form_id, item.invoice_item_id, item.unit_price, item.quantity, item.amount, item.invoice_id, item.description, item.* from season s left join carpark c using(carpark_id) left join invoice_item item using (season_id) where ${prepare_where(where, db)} ${order} ${limitation} ${offsetion}`
         const season = await db.query(sql)
         return season
     } catch (err) {
@@ -308,7 +308,7 @@ const list_season_for_admin = async data => {
         const order = orderby ? `order by ${orderby} ${orderdirection || 'desc'}` : '';
         const limitation = limit === 'no' ? '' : `limit ${limit || '100'}`;
         const offsetion = offset ? `offset ${offset}` : '';
-        const sql = `select s.*, c.carpark_name, c.carpark_code, c.address, c.postal_code, c.public_policy, c.billing_method, c.allow_giro, c.allow_auto_renew, c.status as carpark_status, c.remarks, item.invoice_item_id, item.unit_price, item.quantity, item.amount, item.invoice_id, item.description, item.* from season s left join carpark c using(carpark_id) left join invoice_item item using (season_id) where ${prepare_where(where, db)} ${order} ${limitation} ${offsetion}`
+        const sql = `select s.*, c.carpark_name, c.carpark_code, c.address, c.postal_code, c.public_policy, c.billing_method, c.allow_giro, c.allow_auto_renew, c.status as carpark_status, c.remarks, c.giro_form_id, item.invoice_item_id, item.unit_price, item.quantity, item.amount, item.invoice_id, item.description, item.* from season s left join carpark c using(carpark_id) left join invoice_item item using (season_id) where ${prepare_where(where, db)} ${order} ${limitation} ${offsetion}`
         const season = await db.query(sql)
         return season
     } catch (err) {
