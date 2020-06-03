@@ -43,6 +43,19 @@ file_router.route('/download_file')
     }
 })
 
+file_router.route('/download_giro_form')
+.post(async (req, res, next) => {
+    try {
+        const resp = await file.download_giro_form(req.body.data)
+        const { file_path, name } = resp
+        res.download(file_path, name)
+    } catch (err) {
+        req.data = err
+        next()
+    }
+})
+
+
 
 module.exports = {
     file_router

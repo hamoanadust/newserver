@@ -215,7 +215,7 @@ CREATE TABLE IF NOT EXISTS file (
     file_id SERIAL NOT NULL,
     carpark_id int,
     user_id int,
-    file_type enum('TENANT_FILE') not null default 'TENANT_FILE',
+    file_type enum('TENANT_FILE', 'GIRO_FORM') not null default 'TENANT_FILE',
     name varchar(20),
     file_name varchar(26),
     mimetype varchar(20),
