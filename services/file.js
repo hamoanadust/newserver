@@ -64,7 +64,7 @@ const download_file = async data => {
 const download_giro_form = async data => {
     try {
         const { file_id } = data
-        const resp = await execute_query('get_item_by_condition', { where: { file_id, file_type: 'GIRO_FORM' } }, 'file', db)
+        const resp = await execute_query('get_item_by_condition', { where: { whereand: { file_id, file_type: 'GIRO_FORM' } } }, 'file', db)
         if (!resp || resp.length === 0) throw new Error('file not found')
         const { name, file_name, file_path } = resp[0]
         return { name, file_name, file_path }
