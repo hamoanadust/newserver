@@ -232,7 +232,7 @@ CREATE TABLE IF NOT EXISTS member (
     carpark_id int,
     user_id int,
     file_id int,
-    quota tinyint,
+    quota tinyint UNSIGNED default 255,
     status enum('ACTIVE', 'INACTIVE') not null default 'INACTIVE',
     created_at datetime,
     updated_at datetime,

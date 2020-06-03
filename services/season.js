@@ -111,7 +111,7 @@ const add_season_with_invoice = async data => {
         const [vehicle, holder_data, member_data] = await Promise.all([
             vehicle_id ? execute_query('get_item_by_condition', { where: { vehicle_id } }, 'vehicle', db) : undefined,
             holder_id ? execute_query('get_item_by_condition', { where: { user_id: holder_id }, limit: 1 }, 'user', db) : undefined,
-            holder_id || user.user_id ? execute_query('get_item_by_condition', { where: { whereand: { user_id: holder_id || user.user_id, carpark_id, status: 'ACTIVE', whereor: { quota: { gt: 0, is: null } } } }, limit: 1}, 'member', db) : undefined,
+            holder_id || user.user_id ? execute_query('get_item_by_condition', { where: { whereand: { user_id: holder_id || user.user_id, carpark_id, status: 'ACTIVE', quota: { gt: 0 } } }, limit: 1}, 'member', db) : undefined,
         ])
         const holder_type = member_data && member_data[0] ? 'TENANT' : 'PUBLIC'
         const holder = holder_data && holder_data.length === 1 ? holder_data[0] : undefined
@@ -189,7 +189,7 @@ const add_season_by_admin = async data => {
         const { carpark_id, start_date, end_date, card_number, vehicle_number, card_type, vehicle_type, attn, user_id, user } = data
         const [holder, member] = await Promise.all([
             execute_query('get_item_by_condition', { where: { user_id }, limit: 1 }, 'user', db),
-            execute_query('get_item_by_condition', { where: { whereand: { user_id, carpark_id, status: 'ACTIVE', whereor: { quota: { gt: 0, is: null } } } }, limit: 1 }, 'member', db)
+            execute_query('get_item_by_condition', { where: { whereand: { user_id, carpark_id, status: 'ACTIVE', quota: { gt: 0 } } }, limit: 1 }, 'member', db)
         ])
         if (!holder && holder.length === 0) throw new Error('user not found')
         const holder_type = member && member[0] ? 'TENANT' : 'PUBLIC'
