@@ -69,7 +69,7 @@ const checkout_invoice = async data => {
             await Promise.all([
                 db.query(`update invoice set status = 'PAID' where invoice_id in (${invoice_id.toString()})`),
                 db.query(`update season set status = 'ACTIVE' where season_id in (${season_id.toString()})`),
-                db.query(`update member set quota = quota - 1 where season_id in ${member_season_id}`)
+                db.query(`update member set quota = quota - 1 where season_id in (${member_season_id.toString()})`)
             ])
             return true
         } else {
