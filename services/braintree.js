@@ -64,12 +64,12 @@ const checkout_invoice = async data => {
         if (resp.success) {
             const invoice_item = await execute_query('get_item_by_condition', { where: { invoice_id } }, 'invoice_item', db )
             const season_id = invoice_item.map(e => e.season_id)
-            const seasons = await execute_query('get_item_by_condition', { where: { season_id } }, 'season', db)
-            const member_season_id = seasons.filter(s => s.holder_type === 'TENANT').map(s => s.season_id)
+            // const seasons = await execute_query('get_item_by_condition', { where: { season_id } }, 'season', db)
+            // const member_season_id = seasons.filter(s => s.holder_type === 'TENANT').map(s => s.season_id)
             await Promise.all([
                 db.query(`update invoice set status = 'PAID' where invoice_id in (${invoice_id.toString()})`),
                 db.query(`update season set status = 'ACTIVE' where season_id in (${season_id.toString()})`),
-                db.query(`update member set quota = quota - 1 where season_id in (${member_season_id.toString()})`)
+                db.query(`UPDATE member m join season s on s.carpark_id = m.carpark_id and s.holder_id = m.user_id set m.quota = m.quota - 1 where m.status = 'ACTIVE' and s.holder_type = 'TENANT' and s.season_id in (${season_id.toString()})`)
             ])
             return true
         } else {
