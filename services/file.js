@@ -57,7 +57,7 @@ const download_file = async data => {
         const { name, file_name, file_path } = resp[0]
         return { name, file_name, file_path }
     } catch(err) {
-        return err
+        throw err
     }
 }
 
@@ -69,7 +69,7 @@ const download_giro_form = async data => {
         const { name, file_name, file_path } = resp[0]
         return { name, file_name, file_path }
     } catch(err) {
-        return err
+        throw err
     }
 }
 
