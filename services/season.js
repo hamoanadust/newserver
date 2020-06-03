@@ -147,7 +147,7 @@ const renew_season_with_invoice = async data => {
         else if (moment(end_date).format('DD/MM/YYYY') !== moment(end_date).endOf('month').format('DD/MM/YYYY')) throw new Error('renew end date must be end of a month')
         else if (moment(end_date).format('DD/MM/YYYY') === moment(szn[0].end_date).endOf('month').format('DD/MM/YYYY')) throw new Error('renew end date cannot be the same with previous end date')
         else if (moment(end_date).isBefore(moment(szn[0].end_date))) throw new Error('renew end date is before previous end date')
-        const season = await create_season({ ...szn[0], start_date: moment(szn[0].end_date).add(1, 'day').format('YYYY-MM-DD'), end_date, renew: true, created_by: user.username })
+        const season = await create_season({ ...szn[0], first_start_date: moment(szn[0].first_start_date).format('YYYY-MM-DD'), start_date: moment(szn[0].end_date).add(1, 'day').format('YYYY-MM-DD'), end_date, renew: true, created_by: user.username })
         if (!season) throw new Error('create season fail')
         const invoice_items = [season.invoice_item]
         const invoice_data = { invoice_items, invoice_type: 'RENEW', attn, buyer_id: user.user_id, buyer_name: user.name, buyer_company: user.company, buyer_email: user.email, buyer_contact_number: user.contact_number, buyer_address: user.address, created_by: user.username }
@@ -173,6 +173,7 @@ const renew_season_batch = async data => {
             e.end_date = moment(end_date).format('YYYY-MM-DD')
             e.renew = true
             e.created_by = user.username
+            e.first_start_date = moment(e.first_start_date).format('YYYY-MM-DD')
         })
         const new_seasons = await Promise.all(szns.map(e => create_season(e)))
         const invoice_items = new_seasons.map(e => e.invoice_item)
@@ -225,7 +226,16 @@ const list_all_season = async data => {
         const { holder_id } = data
         const sql = `select s.*, c.carpark_name, c.carpark_code, c.address, c.postal_code, c.public_policy, c.billing_method, c.allow_giro, c.allow_auto_renew, c.status as carpark_status, c.remarks, c.giro_form_id, item.invoice_item_id, item.unit_price, item.quantity, item.amount, item.invoice_id, item.description, item.* from season s left join carpark c using(carpark_id) left join invoice_item item using (season_id) where s.holder_id = ${db.escape(holder_id)} and s.status in ('NEW', 'ACTIVE')`
         const season = await db.query(sql)
-        return season
+        let result = []
+        season.forEach(s => {
+            const idx = result.findIndex(r => r.card_number === s.card_number && r.first_start_date === s.first_start_date)
+            if (idx !== -1) {
+                if (result[idx].end_date < s.end_date) result.splice(idx, 1, s)
+            } else {
+                result.push(s)
+            }
+        })
+        return result
     } catch (err) {
         return err
     }
@@ -251,13 +261,14 @@ const set_auto_renew = async data => {
 const auto_renew = async data => {
     try {
         const { user } = data
-        const sql = `select s.season_id, s.end_date as old_end_date, u.user_id, u.customer_id, u.name, u.email, u.contact_number, p.token, p.payment_method_id from season s left join user u on s.holder_id = u.user_id right join payment_method p on (u.customer_id = p.customer_id && p.status = 'ACTIVE' && p.is_default = true) where s.auto_renew = true and s.status = 'ACTIVE' and s.holder_id is not null and u.customer_id is not null and MONTH(s.end_date) = MONTH(NOW())`
+        const sql = `select s.season_id, s.first_start_date, s.end_date as old_end_date, u.user_id, u.customer_id, u.name, u.email, u.contact_number, p.token, p.payment_method_id from season s left join user u on s.holder_id = u.user_id right join payment_method p on (u.customer_id = p.customer_id && p.status = 'ACTIVE' && p.is_default = true) where s.auto_renew = true and s.status = 'ACTIVE' and s.holder_id is not null and u.customer_id is not null and MONTH(s.end_date) = MONTH(NOW())`
         let szns = await db.query(sql)
         const seasons = szns.map(e => { 
             return { 
                 season_id: e.season_id,
                 payment_method_id: e.payment_method_id, 
                 end_date: moment(e.end_date).startOf('month').add(1, 'month').endOf('month').format('YYYY-MM-DD'),
+                first_start_date: moment(e.first_start_date).format('YYYY-MM-DD'),
                 attn: 'AUTO RENEW',
                 user: {
                     user_id: e.user_id,
@@ -295,7 +306,16 @@ const list_season = async data => {
         const offsetion = offset ? `offset ${offset}` : '';
         const sql = `select s.*, c.carpark_name, c.carpark_code, c.address, c.postal_code, c.public_policy, c.billing_method, c.allow_giro, c.allow_auto_renew, c.status as carpark_status, c.remarks, c.giro_form_id, item.invoice_item_id, item.unit_price, item.quantity, item.amount, item.invoice_id, item.description, item.* from season s left join carpark c using(carpark_id) left join invoice_item item using (season_id) where ${prepare_where(where, db)} ${order} ${limitation} ${offsetion}`
         const season = await db.query(sql)
-        return season
+        let result = []
+        season.forEach(s => {
+            const idx = result.findIndex(r => r.card_number === s.card_number && r.first_start_date === s.first_start_date)
+            if (idx !== -1) {
+                if (result[idx].end_date < s.end_date) result.splice(idx, 1, s)
+            } else {
+                result.push(s)
+            }
+        })
+        return result
     } catch (err) {
         return err
     }
