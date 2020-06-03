@@ -92,7 +92,7 @@ const create_invoice = async data => {
 const add_season_with_invoice = async data => {
     try {
         let { carpark_id, card_number, start_date, end_date, //required
-            card_type, vehicle_type, holder_type, attn, vehicle_id, created_by,  //optional with a default value
+            card_type, vehicle_type, attn, vehicle_id, created_by,  //optional with a default value
             vehicle_number, holder_id, holder_name, holder_company, holder_address, holder_contact_number, holder_email,//optional
             user } = data//from middleware
         if (!carpark_id) throw new Error('no carpark id')
@@ -108,11 +108,12 @@ const add_season_with_invoice = async data => {
         attn = attn || 'system'
         card_type = card_type || 'IU'
         vehicle_type = vehicle_type || 'CAR'
-        holder_type = holder_type || 'PUBLIC'
-        const [vehicle, holder_data] = await Promise.all([
-            vehicle_id ? execute_query('get_item_by_condition', {where: {vehicle_id}}, 'vehicle', db) : undefined,
-            holder_id ? execute_query('get_item_by_condition', {where: {user_id: holder_id}, limit: 1}, 'user', db) : undefined
+        const [vehicle, holder_data, member_data] = await Promise.all([
+            vehicle_id ? execute_query('get_item_by_condition', { where: { vehicle_id } }, 'vehicle', db) : undefined,
+            holder_id ? execute_query('get_item_by_condition', { where: { user_id: holder_id }, limit: 1 }, 'user', db) : undefined,
+            holder_id ? execute_query('get_item_by_condition', { where: { whereand: { user_id: holder_id, carpark_id, status: 'ACTIVE', quota: { whereor: { gt: 0, is: null } } } }, limit: 1}, 'member', db) : undefined,
         ])
+        const holder_type = member_data && member_data[0] ? 'TENANT' : 'PUBLIC'
         const holder = holder_data && holder_data.length === 1 ? holder_data[0] : undefined
         vehicle_number = vehicle_number || (vehicle && vehicle.length === 1 ? vehicle[0].vehicle_number : '')
         holder_id = holder_id || (user ? user.user_id : undefined)
@@ -185,9 +186,13 @@ const renew_season_batch = async data => {
 
 const add_season_by_admin = async data => {
     try {
-        const { carpark_id, start_date, end_date, card_number, vehicle_number, card_type, vehicle_type, holder_type, attn, user_id, user } = data
-        const holder = await execute_query('get_item_by_condition', { where: { user_id }, limit: 1 }, 'user', db)
+        const { carpark_id, start_date, end_date, card_number, vehicle_number, card_type, vehicle_type, attn, user_id, user } = data
+        const [holder, member] = await Promise.all([
+            execute_query('get_item_by_condition', { where: { user_id }, limit: 1 }, 'user', db),
+            execute_query('get_item_by_condition', { where: { user_id, carpark_id, status: 'ACTIVE', quota: { whereor: { gt: 0, is: null } } }, limit: 1 }, 'member', db)
+        ])
         if (!holder && holder.length === 0) throw new Error('user not found')
+        const holder_type = member && member[0] ? 'TENANT' : 'PUBLIC'
         const holder_id = user_id
         const holder_name = holder[0].name
         const holder_address = holder[0].address
@@ -325,6 +330,18 @@ const terminate_season = async data => {
     }
 }
 
+const terminate_season_batch = async data => {
+    try {
+        const { seasons, user } = data
+        const resp = await Promise.all(seasons.map(s => terminate_season({ season_id: s.season_id, user })))
+        return resp.map(e => { 
+            return e instanceof Error ? { error: e.message } : e
+        })
+    } catch (err) {
+        return err
+    }
+}
+
 module.exports = {
     find_season,
     add_season_by_admin,
@@ -335,6 +352,7 @@ module.exports = {
     list_season,
     list_season_for_admin,
     terminate_season,
+    terminate_season_batch,
     renew_season_batch,
     auto_renew,
     set_auto_renew

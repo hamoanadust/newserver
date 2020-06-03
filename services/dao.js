@@ -30,6 +30,8 @@ const prepare_increment = (increment, db) => {
 
 const prepare_operator = str => {
     switch (str) {
+        case 'is':
+            return 'is'
         case 'gt':
             return '>';
         case 'lt':

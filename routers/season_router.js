@@ -103,6 +103,18 @@ season_router.route('/terminate_season')
     }
 })
 
+season_router.route('/terminate_season_batch')
+.post(verify_user, async (req, res, next) => {
+    try {
+        req.body.data = req.body.data || {}
+        req.body.data.user = req.user
+        req.data = await season.terminate_season_batch(req.body.data)
+        next()
+    } catch (err) {
+        throw err
+    }
+})
+
 season_router.route('/list_season_for_admin')
 .post(verify_admin, async (req, res, next) => {
     try {
