@@ -123,7 +123,7 @@ const add_season_with_invoice = async data => {
         holder_contact_number = holder_contact_number || (holder ? holder.contact_number : undefined) || (user ? user.contact_number : '')
         holder_email = holder_email || (holder ? holder.email : undefined) || (user ? user.email : '')
         created_by = created_by || holder_name
-        const season_data = { carpark_id, card_number, start_date, end_date, card_type, vehicle_type, holder_type, vehicle_number, holder_id, holder_name, holder_company, holder_address, holder_contact_number, holder_email, created_by }
+        const season_data = { carpark_id, card_number, start_date, end_date, first_start_date: start_date, card_type, vehicle_type, holder_type, vehicle_number, holder_id, holder_name, holder_company, holder_address, holder_contact_number, holder_email, created_by }
         const season = await create_season(season_data)
         if (!season) throw new Error('create season fail')
         const invoice_items = [season.invoice_item]
