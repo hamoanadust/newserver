@@ -27,9 +27,9 @@ const find_season = async data => {
 
 const create_season = async data => {
     try {
-        let { renew, carpark_id, card_type, card_number, start_date, end_date, vehicle_number, vehicle_type, holder_id, holder_name, holder_company, holder_email, holder_contact_number, holder_address, holder_type, created_by } = data
+        let { renew, carpark_id, card_type, card_number, start_date, end_date, first_start_date, vehicle_number, vehicle_type, holder_id, holder_name, holder_company, holder_email, holder_contact_number, holder_address, holder_type, created_by } = data
       
-        const item = { carpark_id, card_type, card_number, start_date, end_date, vehicle_number, vehicle_type, holder_id, holder_name, holder_company, holder_email, holder_contact_number, holder_address, holder_type, created_at: moment().format('YYYY-MM-DD HH:mm:ss'), updated_at: moment().format('YYYY-MM-DD HH:mm:ss'), created_by, updated_by: created_by }
+        const item = { carpark_id, card_type, card_number, start_date, end_date, first_start_date, vehicle_number, vehicle_type, holder_id, holder_name, holder_company, holder_email, holder_contact_number, holder_address, holder_type, created_at: moment().format('YYYY-MM-DD HH:mm:ss'), updated_at: moment().format('YYYY-MM-DD HH:mm:ss'), created_by, updated_by: created_by }
         const [carpark, season_rate] = await Promise.all([
             execute_query('get_item_by_condition', {where: {carpark_id}}, 'carpark', db),
             execute_query('get_item_by_condition', {where: {whereand: {carpark_id, vehicle_type, client_type: holder_type, status: 'ACTIVE'}}, limit: 1}, 'season_rate', db),
