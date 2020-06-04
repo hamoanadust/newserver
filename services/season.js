@@ -309,6 +309,7 @@ const list_season = async data => {
         let result = []
         season.forEach(s => {
             const idx = result.findIndex(r => r.card_number === s.card_number && r.first_start_date === s.first_start_date)
+            console.log(idx)
             if (idx !== -1) {
                 if (result[idx].end_date < s.end_date) result.splice(idx, 1, s)
             } else {
