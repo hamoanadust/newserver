@@ -308,7 +308,7 @@ const list_season = async data => {
         const season = await db.query(sql)
         let result = []
         season.forEach(s => {
-            const idx = result.findIndex(r => r.card_number === s.card_number && r.first_start_date === s.first_start_date)
+            const idx = result.findIndex(r => r.card_number === s.card_number && moment(r.first_start_date).format('YYYY-MM-DD') === moment(s.first_start_date).format('YYYY-MM-DD'))
             console.log(s.season_id, idx)
             if (idx !== -1) {
                 console.log(idx, s.season_id, s.card_number, '<-->', result[idx].card_number, s.first_start_date, '<-->', result[idx].first_start_date)
