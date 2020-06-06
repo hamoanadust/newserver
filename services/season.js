@@ -339,11 +339,10 @@ const list_season_for_admin = async data => {
 const terminate_season = async data => {
     try {
         const { season_id, user } = data
-        const id = season_id
         const condition = { status: 'TERMINATED' }
         const szn = await execute_query('get_item_by_condition', { where: { whereand: { holder_id: user.user_id, season_id } } }, 'season', db)
         if (!szn || szn.length === 0) throw new Error('season not found')
-        const resp = await execute_query('update_item_by_id', { condition, id }, 'season', db)
+        const resp = await execute_query('update_item_by_id', { condition, where: { first_start_date: szn[0].first_start_date } }, 'season', db)
         return resp
     } catch (err) {
         return err
