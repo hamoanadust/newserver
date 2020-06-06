@@ -43,7 +43,9 @@ const sale = data => {
 const checkout_invoice = async data => {
     try {
         const { paymentMethodNonce, invoice_id, user, payment_method_id } = data
-        const invoice = await execute_query('get_item_by_condition', { where: { whereand: { invoice_id, status: 'OUTSTANDING' } } }, 'invoice', db)
+        // const invoice = await execute_query('get_item_by_condition', { where: { whereand: { invoice_id, status: 'OUTSTANDING' } } }, 'invoice', db)
+        const sql = `select i.*, s.season_id, s.first_season_id, s.is_latest, s.first_start_date from invoice i left join invoice_item it using (invoice_id) left join season s on it.season_id = s.season_id where i.invoice_id in (${invoice_id.toString()}) and i.status = 'OUTSTANDING'`
+        const invoice = await db.query(sql)
         if (!invoice || invoice.length === 0) throw new Error('No outstanding invoice is found')
         else if (Array.isArray(invoice_id) && invoice_id.length !== invoice.length) throw new Error('Some of the outstanding invoices are not found')
         const amount = invoice.reduce((r, e) => r + e.total_amount, 0)
@@ -62,13 +64,13 @@ const checkout_invoice = async data => {
         if (!paymentMethodNonce && !payment.paymentMethodToken) throw new Error('no payment method is provided')
         const resp = await sale(payment)
         if (resp.success) {
-            const invoice_item = await execute_query('get_item_by_condition', { where: { invoice_id } }, 'invoice_item', db )
-            const season_id = invoice_item.map(e => e.season_id)
-            // const seasons = await execute_query('get_item_by_condition', { where: { season_id } }, 'season', db)
+            const season_id = invoice.map(e => e.season_id)
+            const first_season_id =invoice.map(e => e.first_season_id)
             // const member_season_id = seasons.filter(s => s.holder_type === 'TENANT').map(s => s.season_id)
             await Promise.all([
                 db.query(`update invoice set status = 'PAID' where invoice_id in (${invoice_id.toString()})`),
                 db.query(`update season set status = 'ACTIVE' where season_id in (${season_id.toString()})`),
+                db.query(`update season set is_latest = false where first_season_id in (${first_season_id.toString()}) and is_latest = true and season_id not in (${season_id.toString()})`),
                 db.query(`UPDATE member m join season s on s.carpark_id = m.carpark_id and s.holder_id = m.user_id set m.quota = m.quota - 1 where m.status = 'ACTIVE' and s.holder_type = 'TENANT' and s.season_id in (${season_id.toString()})`)
             ])
             return true

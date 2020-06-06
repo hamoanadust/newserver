@@ -63,6 +63,8 @@ status ENUM('NEW', 'ACTIVE', 'TERMINATED', 'INACTIVE', 'PENDING', 'CANCELLED', '
 vehicle_number varchar(10),
 vehicle_type enum('CAR', 'MOTOR', 'LORRY'),
 auto_renew boolean,
+first_season_id int,
+is_latest boolean,
 holder_id int,
 holder_name varchar(50),
 holder_company varchar(100),
