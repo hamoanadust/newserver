@@ -51,26 +51,18 @@ const checkout_invoice = async data => {
         const amount = invoice.reduce((r, e) => r + e.total_amount, 0)
         let payment = { amount }
         if (paymentMethodNonce) {
-            console.log('nonce')
             payment.paymentMethodNonce = paymentMethodNonce
         } else if (payment_method_id) {
-            console.log('payment_method_id', payment_method_id)
             const payment_methods = await execute_query('get_item_by_condition', { where: { whereand: { customer_id: user.customer_id, payment_method_id, status: 'ACTIVE' } } }, 'payment_method', db) 
-            
-            console.log('payment_methods', payment_methods)
             if (!payment_methods || payment_methods.length === 0) throw new Error('payment method not found')
             else payment.paymentMethodToken = payment_methods[0].token
         } else {
-            console.log('payment_me', payment_methods)
             const payment_methods = await execute_query('get_item_by_condition', { where: { whereand: { customer_id: user.customer_id, status: 'ACTIVE' } } }, 'payment_method', db) 
-            
-            console.log('payment_me', payment_methods)
             if (!payment_methods || payment_methods.length === 0) throw new Error('payment method not found')
             payment.paymentMethodToken = payment_methods.find(e => e.is_default) ? payment_methods.find(e => e.is_default).token : payment_methods[0].token
         }
         if (!paymentMethodNonce && !payment.paymentMethodToken) throw new Error('no payment method is provided')
         const resp = await sale(payment)
-        console.log('sale', resp)
         if (resp.success) {
             const season_id = invoice.map(e => e.season_id)
             const first_season_id =invoice.map(e => e.first_season_id)
@@ -82,8 +74,7 @@ const checkout_invoice = async data => {
                 db.query(`UPDATE member m join season s on s.carpark_id = m.carpark_id and s.holder_id = m.user_id set m.quota = m.quota - 1 where m.status = 'ACTIVE' and s.holder_type = 'TENANT' and s.season_id in (${season_id.toString()})`)
             ])
             return `checkout invoice success for invoice_id ${invoice_id}`
-        } else {qs  
-            console.log(resp)
+        } else {
             throw new Error(`checkout invoice fail for invoice_id ${invoice_id}`)
         }
     } catch(err) {
