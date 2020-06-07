@@ -265,8 +265,9 @@ const set_auto_renew = async data => {
 const auto_renew = async data => {
     try {
         const { user } = data
-        const sql = `select s.season_id, s.first_season_id, s.first_start_date, s.end_date as old_end_date, u.user_id, u.customer_id, u.name, u.email, u.contact_number, p.token, p.payment_method_id from season s left join user u on s.holder_id = u.user_id right join payment_method p on (u.customer_id = p.customer_id && p.status = 'ACTIVE' && p.is_default = true) where s.auto_renew = true and s.status = 'ACTIVE' and s.holder_id is not null and u.customer_id is not null and MONTH(s.end_date) = MONTH(NOW()) and s.is_latest = true`
+        const sql = `select s.season_id, s.first_season_id, s.first_start_date, s.end_date as old_end_date, u.user_id, u.customer_id, u.name, u.email, u.contact_number, p.token, p.payment_method_id from season s left join user u on s.holder_id = u.user_id right join payment_method p on (u.customer_id = p.customer_id and p.status = 'ACTIVE' and p.is_default = true) where s.auto_renew = true and s.status = 'ACTIVE' and s.holder_id is not null and u.customer_id is not null and MONTH(s.end_date) = MONTH(NOW()) and s.is_latest = true`
         let szns = await db.query(sql)
+        console.log(szns)
         const seasons = szns.map(e => { 
             return { 
                 season_id: e.season_id,
@@ -294,7 +295,7 @@ const auto_renew = async data => {
             }
         })
         const check = await Promise.all(items.map(e => checkout_invoice(e)))
-        return true
+        return check
     } catch (err) {
         return err
     }
