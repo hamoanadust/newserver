@@ -286,7 +286,9 @@ const auto_renew = async data => {
                 }
             } 
         })
+        console.log(seasons)
         const renewal = await Promise.all(seasons.map(e => renew_season_with_invoice(e)))
+        console.log(renewal)
         const items = renewal.map(e => {
             let item = seasons.find(s => s.season_id === e.season.season_id)
             return {
