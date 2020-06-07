@@ -87,6 +87,7 @@ const checkout_invoice = async data => {
             throw new Error()
         }
     } catch(err) {
+        console.log(err)
         return err
     }
 }
