@@ -81,10 +81,10 @@ const checkout_invoice = async data => {
                 db.query(`update season set is_latest = false where first_season_id in (${first_season_id.toString()}) and is_latest = true and season_id not in (${season_id.toString()})`),
                 db.query(`UPDATE member m join season s on s.carpark_id = m.carpark_id and s.holder_id = m.user_id set m.quota = m.quota - 1 where m.status = 'ACTIVE' and s.holder_type = 'TENANT' and s.season_id in (${season_id.toString()})`)
             ])
-            return true
-        } else {
+            return `checkout invoice success for invoice_id ${invoice_id}`
+        } else {qs  
             console.log(resp)
-            throw new Error()
+            throw new Error(`checkout invoice fail for invoice_id ${invoice_id}`)
         }
     } catch(err) {
         console.log(err)
