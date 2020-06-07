@@ -58,7 +58,7 @@ const list_member = async data => {
         const order = orderby ? `order by ${orderby} ${orderdirection || 'desc'}` : '';
         const limitation = limit === 'no' ? '' : `limit ${limit || '100'}`;
         const offsetion = offset ? `offset ${offset}` : '';
-        const sql = `select m.member_id, m.user_id, m.carpark_id, m.status as member_status, u.username, u.name, u.company, u.contact_number, u.email, c.carpark_name, c.carpark_code, c.address as carpark_address, c.postal_code, c.public_policy, c.billing_method, c.allow_auto_renew, c.allow_giro, c.status as carpark_status, c.remarks from member m left join user u using(user_id) left join carpark c using(carpark_id) where ${prepare_where(where, db)} ${order} ${limitation} ${offsetion}`
+        const sql = `select m.member_id, m.user_id, m.carpark_id, m.status as member_status, m.file_id, f.file_type, f.name, file_status, u.username, u.name, u.company, u.contact_number, u.email, c.carpark_name, c.carpark_code, c.address as carpark_address, c.postal_code, c.public_policy, c.billing_method, c.allow_auto_renew, c.allow_giro, c.status as carpark_status, c.remarks from member m left join file using(file_id) left join user u using(user_id) left join carpark c using(carpark_id) where ${prepare_where(where, db)} ${order} ${limitation} ${offsetion}`
         const member = await db.query(sql)
         return member
     } catch (err) {
@@ -73,7 +73,7 @@ const list_member_for_admin = async data => {
         const order = orderby ? `order by ${orderby} ${orderdirection || 'desc'}` : '';
         const limitation = limit === 'no' ? '' : `limit ${limit || '100'}`;
         const offsetion = offset ? `offset ${offset}` : '';
-        const sql = `select m.member_id, m.user_id, m.carpark_id, m.status as member_status, u.username, u.name, u.company, u.contact_number, u.email, c.carpark_name, c.carpark_code, c.address as carpark_address, c.postal_code, c.public_policy, c.billing_method, c.allow_auto_renew, c.allow_giro, c.status as carpark_status, c.remarks from member m left join user u using(user_id) left join carpark c using(carpark_id) where ${prepare_where(where, db)} ${order} ${limitation} ${offsetion}`
+        const sql = `select m.member_id, m.user_id, m.carpark_id, m.status as member_status, m.file_id, f.file_type, f.name, f.file_name, f.mimetype, f.size, f.file_path, f.status as file_status, u.username, u.name, u.company, u.contact_number, u.email, c.carpark_name, c.carpark_code, c.address as carpark_address, c.postal_code, c.public_policy, c.billing_method, c.allow_auto_renew, c.allow_giro, c.status as carpark_status, c.remarks from member m left join file using(file_id) left join user u using(user_id) left join carpark c using(carpark_id) where ${prepare_where(where, db)} ${order} ${limitation} ${offsetion}`
         const member = await db.query(sql)
         return member
     } catch (err) {
