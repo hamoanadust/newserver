@@ -265,7 +265,7 @@ const set_auto_renew = async data => {
 const auto_renew = async data => {
     try {
         const { user } = data
-        const sql = `select s.season_id, s.first_season_id, s.first_start_date, s.end_date as old_end_date, u.user_id, u.customer_id, u.name, u.email, u.contact_number, p.token, p.payment_method_id from season s left join user u on s.holder_id = u.user_id right join payment_method p on (u.customer_id = p.customer_id and p.status = 'ACTIVE' and p.is_default = true) where s.auto_renew = true and s.status = 'ACTIVE' and s.holder_id is not null and u.customer_id is not null and MONTH(s.end_date) = MONTH(NOW()) and s.is_latest = true`
+        const sql = `select s.season_id, s.first_season_id, s.first_start_date, s.end_date as old_end_date, u.user_id, u.customer_id, u.name, u.email, u.contact_number, u.customer_id, p.token, p.payment_method_id from season s left join user u on s.holder_id = u.user_id right join payment_method p on (u.customer_id = p.customer_id and p.status = 'ACTIVE' and p.is_default = true) where s.auto_renew = true and s.status = 'ACTIVE' and s.holder_id is not null and u.customer_id is not null and MONTH(s.end_date) = MONTH(NOW()) and s.is_latest = true`
         let szns = await db.query(sql)
         console.log(szns)
         const seasons = szns.map(e => { 
@@ -282,7 +282,8 @@ const auto_renew = async data => {
                     company: e.company, 
                     email: e.email, 
                     contact_number: e.contact_number,
-                    address: e.address
+                    address: e.address,
+                    customer_id: e.customer_id
                 }
             } 
         })
@@ -293,11 +294,12 @@ const auto_renew = async data => {
             let item = seasons.find(s => s.season_id === e.season.first_season_id)
             return {
                 invoice_id: e.invoice.invoice_id,
-                payment_method_id: item.payment_method_id
+                payment_method_id: item.payment_method_id,
+                user: item.user
             }
         })
         const check = await Promise.all(items.map(e => checkout_invoice(e)))
-        return check
+        return check.map(e => e instanceof Error ? e.message : e)
     } catch (err) {
         return err
     }
