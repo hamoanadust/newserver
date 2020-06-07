@@ -69,7 +69,7 @@ const list_member = async data => {
 const list_member_for_admin = async data => {
     try {
         let { where, limit, offset, orderby, orderdirection } = data
-        where = where || { member_id: { gt: 0 } }
+        where = where || { 'm.member_id': { gt: 0 } }
         const order = orderby ? `order by ${orderby} ${orderdirection || 'desc'}` : '';
         const limitation = limit === 'no' ? '' : `limit ${limit || '100'}`;
         const offsetion = offset ? `offset ${offset}` : '';

@@ -8,6 +8,7 @@ exports.pool = pool;
 
 exports.query = sql => {
   return new Promise((resolve, reject) => {
+    console.log(sql)
       pool.query(sql, (err, rows) => {
           if (err) {
               return reject(err);
