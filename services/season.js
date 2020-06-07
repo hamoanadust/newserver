@@ -290,7 +290,7 @@ const auto_renew = async data => {
         const renewal = await Promise.all(seasons.map(e => renew_season_with_invoice(e)))
         console.log(renewal)
         const items = renewal.map(e => {
-            let item = seasons.find(s => s.season_id === e.season.season_id)
+            let item = seasons.find(s => s.season_id === e.season.first_season_id)
             return {
                 invoice_id: e.invoice.invoice_id,
                 payment_method_id: item.payment_method_id
