@@ -43,7 +43,7 @@ const sale = data => {
 const checkout_invoice = async data => {
     try {
         const { paymentMethodNonce, invoice_id, user, payment_method_id } = data
-        // const invoice = await execute_query('get_item_by_condition', { where: { whereand: { invoice_id, status: 'OUTSTANDING' } } }, 'invoice', db)
+        
         const sql = `select i.*, s.season_id, s.first_season_id, s.is_latest, s.first_start_date from invoice i left join invoice_item it using (invoice_id) left join season s on it.season_id = s.season_id where i.invoice_id in (${invoice_id.toString()}) and i.status = 'OUTSTANDING'`
         const invoice = await db.query(sql)
         if (!invoice || invoice.length === 0) throw new Error('No outstanding invoice is found')
@@ -51,18 +51,26 @@ const checkout_invoice = async data => {
         const amount = invoice.reduce((r, e) => r + e.total_amount, 0)
         let payment = { amount }
         if (paymentMethodNonce) {
+            console.log('nonce')
             payment.paymentMethodNonce = paymentMethodNonce
         } else if (payment_method_id) {
+            console.log('payment_method_id', payment_method_id)
             const payment_methods = await execute_query('get_item_by_condition', { where: { whereand: { customer_id: user.customer_id, payment_method_id, status: 'ACTIVE' } } }, 'payment_method', db) 
+            
+            console.log('payment_methods', payment_methods)
             if (!payment_methods || payment_methods.length === 0) throw new Error('payment method not found')
             else payment.paymentMethodToken = payment_methods[0].token
         } else {
+            console.log('payment_me', payment_methods)
             const payment_methods = await execute_query('get_item_by_condition', { where: { whereand: { customer_id: user.customer_id, status: 'ACTIVE' } } }, 'payment_method', db) 
+            
+            console.log('payment_me', payment_methods)
             if (!payment_methods || payment_methods.length === 0) throw new Error('payment method not found')
             payment.paymentMethodToken = payment_methods.find(e => e.is_default) ? payment_methods.find(e => e.is_default).token : payment_methods[0].token
         }
         if (!paymentMethodNonce && !payment.paymentMethodToken) throw new Error('no payment method is provided')
         const resp = await sale(payment)
+        console.log('sale', resp)
         if (resp.success) {
             const season_id = invoice.map(e => e.season_id)
             const first_season_id =invoice.map(e => e.first_season_id)
