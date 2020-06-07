@@ -291,16 +291,21 @@ const auto_renew = async data => {
         console.log(seasons)
         const renewal = await Promise.all(seasons.map(e => renew_season_with_invoice(e)))
         console.log(renewal)
-        await Promise.all(renewal.map(e => set_auto_renew({ season_id: e.season, auto_renew: true })))
+        // await Promise.all(renewal.map(e => set_auto_renew({ season_id: e.season, auto_renew: true, user: seasons.find(s => s.season_id === e.season.first_season_id) })))
         const items = renewal.map(e => {
             let item = seasons.find(s => s.season_id === e.season.first_season_id)
             return {
                 invoice_id: e.invoice.invoice_id,
                 payment_method_id: item.payment_method_id,
-                user: item.user
+                user: item.user,
+                season_id: e.season.season_id,
+                auto_renew: true
             }
         })
-        const check = await Promise.all(items.map(e => checkout_invoice(e)))
+        const check = await Promise.all(items.map(e => {
+            checkout_invoice(e)
+            set_auto_renew(e)
+        }))
         return check.map(e => e instanceof Error ? e.message : e)
     } catch (err) {
         return err
