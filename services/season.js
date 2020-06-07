@@ -302,10 +302,9 @@ const auto_renew = async data => {
                 auto_renew: true
             }
         })
-        const check = await Promise.all(items.map(e => {
-            checkout_invoice(e)
-            set_auto_renew(e)
-        }))
+        const setAutoRenew = await Promise.all(items.map(e => set_auto_renew(e)))
+        console.log(setAutoRenew)
+        const check = await Promise.all(items.map(e => checkout_invoice(e)))
         return check.map(e => e instanceof Error ? e.message : e)
     } catch (err) {
         return err
