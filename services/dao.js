@@ -142,7 +142,7 @@ query.count_total_items = (condition, table, db) => {
 const execute_query = async (method, data, table, db) => {
     try {
         let sql = query[method](data, table, db);
-        // console.log(sql);
+        console.log(sql);
         const resp = await db.query(sql);
         return resp;
     } catch (err) {
