@@ -35,9 +35,9 @@
         "database" : "test"
     },
     "braintree_config": {
-        "merchantId": "jnrytt5kgj2tnch8",
-        "publicKey": "x8qvb3vm3rnyp3m2",
-        "privateKey": "8b97b4be55b3a2e5586b6edcfaa6b21a"
+        "merchantId": "754bncy7q3xhgmz2",
+        "publicKey": "32bjf3dy3hnq523m",
+        "privateKey": "e4f96af8e4cd3bc18aa01b990eda9d7e"
     },
     "ocbc": {
         "customer_key": "TL23JBRCxtf8iCUzSKdM8KtLO2oa",
