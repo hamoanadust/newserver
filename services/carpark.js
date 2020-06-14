@@ -19,8 +19,14 @@ const add_carpark = data => {
     try {
         let { carpark_name, carpark_code, address, postal_code, public_policy, billing_method, allow_giro, allow_auto_renew, remarks, giro_form_id, allow_prorate, start_date, end_date, user } = data
         if (!carpark_name) throw new Error('carpark_name is required')
+        else if (!start_date) throw new Error('start_date is required')
+        else if (!end_date) throw new Error('end_date is required')
+        else if (moment(start_date).isAfter(moment(end_date))) throw new Error('start date is after end date')
         public_policy = public_policy || 'ALLOW'
         billing_method = billing_method || 'CREDIT_CARD,PAYNOW,CHECK'
+        // allow_auto_renew = allow_auto_renew || false
+        // allow_giro = allow_giro || false
+        // allow_prorate = allow_prorate || false
         const item = { carpark_name, carpark_code, address, postal_code, public_policy, billing_method, allow_giro, allow_auto_renew, remarks, giro_form_id, allow_prorate, start_date, end_date, updated_by: user.username, updated_at: moment().format('YYYY-MM-DD HH:mm:ss'), status: 'ACTIVE' } 
         return execute_query('create_item', item, 'carpark', db)
     } catch (err) {
