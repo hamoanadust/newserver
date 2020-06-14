@@ -33,6 +33,9 @@ updated_by VARCHAR(20),
 status ENUM('ACTIVE', 'INACTIVE') not null default 'ACTIVE',
 remarks VARCHAR(1000),
 giro_form_id tinyint UNSIGNED,
+allow_prorate boolean,
+start_date datetime,
+end_date datetime,
 CONSTRAINT carpark_id_pk PRIMARY KEY(carpark_id)
 );
 
