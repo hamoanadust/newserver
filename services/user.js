@@ -100,7 +100,8 @@ const reset_password = async data => {
             throw new Error('username does not exist')
         } else {
             const hashed = await hash('123456')
-            await execute_query('update_item_by_id', { id: exist[0].user_id, condition: { password: hashed } }, 'user', db)    
+            await execute_query('update_item_by_id', { id: exist[0].user_id, condition: { password: hashed } }, 'user', db)
+            return `password reset for user ${username}`
         }
     } catch (err) {
         return err
