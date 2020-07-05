@@ -17,11 +17,17 @@ const list_all_carpark = () => execute_query('get_item_by_condition', { where: {
 
 const add_carpark = data => {
     try {
-        let { carpark_name, carpark_code, address, postal_code, public_policy, billing_method, allow_giro, allow_auto_renew, remarks, giro_form_id, user } = data
+        let { carpark_name, carpark_code, address, postal_code, public_policy, billing_method, allow_giro, allow_auto_renew, remarks, giro_form_id, allow_prorate, start_date, end_date, user } = data
         if (!carpark_name) throw new Error('carpark_name is required')
+        else if (!start_date) throw new Error('start_date is required')
+        else if (!end_date) throw new Error('end_date is required')
+        else if (moment(start_date).isAfter(moment(end_date))) throw new Error('start date is after end date')
         public_policy = public_policy || 'ALLOW'
         billing_method = billing_method || 'CREDIT_CARD,PAYNOW,CHECK'
-        const item = { carpark_name, carpark_code, address, postal_code, public_policy, billing_method, allow_giro, allow_auto_renew, remarks, giro_form_id, updated_by: user.username, updated_at: moment().format('YYYY-MM-DD HH:mm:ss'), status: 'ACTIVE' } 
+        // allow_auto_renew = allow_auto_renew || false
+        // allow_giro = allow_giro || false
+        // allow_prorate = allow_prorate || false
+        const item = { carpark_name, carpark_code, address, postal_code, public_policy, billing_method, allow_giro, allow_auto_renew, remarks, giro_form_id, allow_prorate, start_date, end_date, updated_by: user.username, updated_at: moment().format('YYYY-MM-DD HH:mm:ss'), status: 'ACTIVE' } 
         return execute_query('create_item', item, 'carpark', db)
     } catch (err) {
         return err
@@ -30,11 +36,11 @@ const add_carpark = data => {
 
 const modify_carpark = async data => {
     try {
-        const { carpark_id, carpark_name, carpark_code, address, postal_code, public_policy, billing_method, allow_giro, allow_auto_renew, remarks, giro_form_id, status, user } = data
+        const { carpark_id, carpark_name, carpark_code, address, postal_code, public_policy, billing_method, allow_giro, allow_auto_renew, remarks, giro_form_id, allow_prorate, start_date, end_date, status, user } = data
         if (!carpark_id) throw new Error('carpark_id is required')
         const cpk = await execute_query('get_item_by_condition', { where: { carpark_id } }, 'carpark', db)
         if (!cpk || cpk.length === 0) throw new Error('carpark not found')
-        const item = { condition: { carpark_name, carpark_code, address, postal_code, public_policy, billing_method, allow_giro, allow_auto_renew, remarks, giro_form_id, status, updated_at: moment().format('YYYY-MM-DD HH:mm:ss'), updated_by: user.username }, id: carpark_id }
+        const item = { condition: { carpark_name, carpark_code, address, postal_code, public_policy, billing_method, allow_giro, allow_auto_renew, remarks, giro_form_id, allow_prorate, start_date, end_date, status, updated_at: moment().format('YYYY-MM-DD HH:mm:ss'), updated_by: user.username }, id: carpark_id }
         return execute_query('update_item_by_id', item, 'carpark', db)
     } catch (err) {
         return err

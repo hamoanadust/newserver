@@ -67,6 +67,13 @@ user_router.route('/list_user_for_admin')
     next()
 })
 
+user_router.route('/reset_password')
+.post(verify_admin, async (req, res, next) => {
+    req.body.data.user = req.user
+    req.data = await user.reset_password(req.body.data)
+    next()
+})
+
 module.exports = {
     user_router
 }

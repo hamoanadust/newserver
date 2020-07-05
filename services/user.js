@@ -94,6 +94,22 @@ const change_password = async data => {
     }
 }
 
+const reset_password = async data => {
+    try {
+        const { username } = data
+        const exist = await execute_query('get_item', { condition: { username } }, 'user', db)
+        if (exist.length === 0) {
+            throw new Error('username does not exist')
+        } else {
+            const hashed = await hash('123456')
+            await execute_query('update_item_by_id', { id: exist[0].user_id, condition: { password: hashed } }, 'user', db)
+            return `password reset for user ${username}`
+        }
+    } catch (err) {
+        return err
+    }
+}
+
 const update_profile = async data => {
     try {
         const { name, company, email, contact_number, user } = data
@@ -123,5 +139,6 @@ module.exports = {
     change_password,
     create_signup_otp,
     update_profile,
+    reset_password,
     list_user_for_admin
 }

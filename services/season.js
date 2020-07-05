@@ -35,15 +35,22 @@ const create_season = async data => {
             execute_query('get_item_by_condition', {where: {whereand: {carpark_id, vehicle_type, client_type: holder_type, status: 'ACTIVE'}}, limit: 1}, 'season_rate', db),
         ])
         if (!carpark || carpark.length === 0) throw new Error('no carpark')
+        else if (moment(carpark[0].start_date).isAfter(moment(start_date))) throw new Error('start date is before carpark start date')
+        else if (moment(end_date).isAfter(moment(carpark[0].end_date))) throw new Error('end date is after carpark end date')
         else if (!season_rate || season_rate.length === 0) throw new Error('no season rate')
-        const { carpark_name, carpark_code, address: carpark_address, postal_code } = carpark[0]
+        const { carpark_name, carpark_code, address: carpark_address, postal_code, allow_prorate } = carpark[0]
+
         const unit_price = season_rate[0].rate
-        const firstPart = moment(start_date).endOf('month').diff(moment(start_date), 'day')/moment(start_date).endOf('month').diff(moment(start_date).startOf('month'), 'day')
-        const secondPart = moment(end_date).startOf('month').diff(moment(start_date).startOf('month'), 'month')
-        const quantity = +(firstPart + secondPart).toFixed(2)
+        let quantity
+        if (allow_prorate) {
+            const firstPart = moment(start_date).endOf('month').diff(moment(start_date), 'day')/moment(start_date).endOf('month').diff(moment(start_date).startOf('month'), 'day')
+            const secondPart = moment(end_date).startOf('month').diff(moment(start_date).startOf('month'), 'month')
+            quantity = +(firstPart + secondPart).toFixed(2)
+        } else {
+            quantity = moment(end_date).startOf('month').diff(moment(start_date).startOf('month'), 'month')
+        }
         const amount = unit_price * quantity
         const description = `${first_season_id ? 'Renew' : 'Purchase new'} season for ${quantity} ${quantity === 1 ? 'month' : 'months'}`
-        
         const season = await execute_query('create_item', item, 'season', db)
         if (!season) throw new Error('create season fail')
         const season_id = season.insertId
