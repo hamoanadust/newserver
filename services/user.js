@@ -4,11 +4,13 @@ const { execute_query } = require('./dao')
 const { hash, compare } = require('./encrypt')
 const auth = require('./auth')
 const { generate_random_integer } = require('./tool')
+const { sendSMS } = require('./twilio')
 
 const create_signup_otp = async data => {
-    const { contact_number } = data
+    const { contact_number, phone_code } = data
     const value = generate_random_integer()
     await execute_query('create_item', { value, contact_number, otp_type: 'SIGNUP', status: 'NEW', updated_at: moment().format('YYYY-MM-DD HH:mm:ss') }, 'otp', db)
+    sendSMS({ body: `Your sign up OTP is ${value}`, phone: `+${phone_code}${contact_number}` })
     return value
 }
 
