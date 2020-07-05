@@ -68,9 +68,28 @@ user_router.route('/list_user_for_admin')
 })
 
 user_router.route('/reset_password')
-.post(verify_admin, async (req, res, next) => {
+.post(async (req, res, next) => {
     req.body.data.user = req.user
     req.data = await user.reset_password(req.body.data)
+    next()
+})
+
+user_router.route('/reset_password_for_admin')
+.post(verify_admin, async (req, res, next) => {
+    req.body.data.user = req.user
+    req.data = await user.reset_password_for_admin(req.body.data)
+    next()
+})
+
+user_router.route('/forget_username')
+.post(async (req, res, next) => {
+    req.data = await user.forget_username(req.body.data)
+    next()
+})
+
+user_router.route('/forget_password')
+.post(async (req, res, next) => {
+    req.data = await user.forget_password(req.body.data)
     next()
 })
 

@@ -9,14 +9,14 @@ const { sendSMS } = require('./twilio')
 const create_signup_otp = async data => {
     const { contact_number, phone_code } = data
     const value = generate_random_integer()
-    await execute_query('create_item', { value, contact_number, otp_type: 'SIGNUP', status: 'NEW', updated_at: moment().format('YYYY-MM-DD HH:mm:ss') }, 'otp', db)
+    await execute_query('create_item', { value, contact_number, phone_code, otp_type: 'SIGNUP', status: 'NEW', updated_at: moment().format('YYYY-MM-DD HH:mm:ss') }, 'otp', db)
     sendSMS({ body: `Your sign up OTP is ${value}`, phone: `+${phone_code}${contact_number}` })
-    return value
+    return true
 }
 
 const check_otp = async data => {
-    const { otp, contact_number } = data
-    const otp_data = await execute_query('get_item_by_condition', { where: { contact_number }, limit: 1, orderby: 'otp_id' }, 'otp', db)
+    const { otp, contact_number, phone_code } = data
+    const otp_data = await execute_query('get_item_by_condition', { where: { whereand: { contact_number, phone_code } }, limit: 1, orderby: 'otp_id' }, 'otp', db)
     if (!otp_data || otp_data.length === 0) return { success: false, message: 'otp not exist' }
     else if (otp_data[0].status === 'EXPIRED') return { success: false, message: 'otp expired' }
     else if (otp_data[0].status === 'LOCK') return { success: false, message: '3 times wrong, otp expired' }
@@ -33,8 +33,8 @@ const check_otp = async data => {
 
 const signup = async data => {
     try {
-        const { username, password, company, contact_number, otp } = data
-        const check = await check_otp({ otp, contact_number })
+        const { username, password, company, phone_code, contact_number, address, otp } = data
+        const check = await check_otp({ otp, contact_number, phone_code })
         if (!check.success) throw new Error(check.message)
         if (!username) throw new Error('no username')
         else if (!password) throw new Error('no password')
@@ -43,7 +43,7 @@ const signup = async data => {
         if (exist.length > 0) {
             throw new Error('username already existed')
         } else {
-            const user = { username, password: hashed, role: 'client', company, contact_number, created_at: moment().format('YYYY-MM-DD HH:mm:ss'), created_by: 'system' }
+            const user = { username, password: hashed, role: 'client', company, contact_number, phone_code, address, created_at: moment().format('YYYY-MM-DD HH:mm:ss'), created_by: 'system' }
             await execute_query('create_item', user, 'user', db)
             return { username, company, contact_number }
         }
@@ -94,7 +94,62 @@ const change_password = async data => {
     }
 }
 
+const forget_username = async data => {
+    try {
+        const { phone_code, contact_number } = data
+        const exist = await execute_query('get_item_by_condition', { where: { whereand: { phone_code, contact_number } } }, 'user', db)
+        if (exist.length === 0) {
+            throw new Error('user with this phone number does not exist')
+        } else {
+            const { username } = exist[0]
+            sendSMS({ body: `Your username is ${username}`, phone: `+${phone_code}${contact_number}` })
+            return true
+        }
+    } catch (err) {
+        return err
+    }
+}
+
+const forget_password = async data => {
+    try {
+        const { username } = data
+        const exist = await execute_query('get_item', { condition: { username } }, 'user', db)
+        if (exist.length === 0) {
+            throw new Error('username does not exist')
+        } else {
+            const { phone_code, contact_number } = exist[0]
+            const value = generate_random_integer()
+            await execute_query('create_item', { value, contact_number, phone_code, otp_type: 'FORGET_PASSWORD', status: 'NEW', updated_at: moment().format('YYYY-MM-DD HH:mm:ss') }, 'otp', db)
+            sendSMS({ body: `Your forget password OTP is ${value}`, phone: `+${phone_code}${contact_number}` })
+            return true
+        }
+    } catch (err) {
+        return err
+    }
+}
+
 const reset_password = async data => {
+    try {
+        const { username, password, otp } = data
+        if (!username) throw new Error('no username')
+        else if (!password) throw new Error('no password')
+        const exist = await execute_query('get_item', { condition: { username } }, 'user', db)
+        if (exist.length === 0) {
+            throw new Error('username does not exist')
+        } else {
+            const { contact_number, phone_code } = exist[0]
+            const check = await check_otp({ otp, contact_number, phone_code })
+            if (!check.success) throw new Error(check.message)
+            const hashed = await hash(password)
+            await execute_query('update_item_by_id', { where: { username }, condition: { password: hashed } }, 'user', db)
+            return true
+        }
+    } catch (err) {
+        return err
+    }
+}
+
+const reset_password_for_admin = async data => {
     try {
         const { username } = data
         const exist = await execute_query('get_item', { condition: { username } }, 'user', db)
@@ -139,6 +194,10 @@ module.exports = {
     change_password,
     create_signup_otp,
     update_profile,
+    forget_username,
+    forget_password,
+    retrieve_password,
     reset_password,
+    reset_password_for_admin,
     list_user_for_admin
 }
