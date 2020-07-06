@@ -196,7 +196,6 @@ module.exports = {
     update_profile,
     forget_username,
     forget_password,
-    retrieve_password,
     reset_password,
     reset_password_for_admin,
     list_user_for_admin
