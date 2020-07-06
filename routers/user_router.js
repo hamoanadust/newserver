@@ -93,6 +93,12 @@ user_router.route('/forget_password')
     next()
 })
 
+user_router.route('/list_country')
+.post(async (req, res, next) => {
+    req.data = await user.list_country()
+    next()
+})
+
 module.exports = {
     user_router
 }

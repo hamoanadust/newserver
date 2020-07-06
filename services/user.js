@@ -189,6 +189,8 @@ const list_user_for_admin = async data => {
     }
 }
 
+const list_country = async () => execute_query('get_items', { nolimit: true }, 'country', db)
+
 module.exports = {
     signup,
     signin,
@@ -199,5 +201,6 @@ module.exports = {
     forget_password,
     reset_password,
     reset_password_for_admin,
-    list_user_for_admin
+    list_user_for_admin,
+    list_country
 }

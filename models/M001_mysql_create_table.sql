@@ -265,3 +265,11 @@ insert into system_config (config_key, config_value, type, description) values
 ('uen', '1234567890', 'COMPANY_INFO', ''),
 ('rcb', '1234567890', 'COMPANY_INFO', '');
 
+
+CREATE TABLE IF NOT EXISTS country (
+country_id int NOT NULL,
+country_name VARCHAR(50),
+phone_code VARCHAR(10),
+country_code VARCHAR(2),
+CONSTRAINT country_id_pk PRIMARY KEY(country_id)
+);
