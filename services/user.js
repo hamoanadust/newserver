@@ -20,6 +20,7 @@ const check_otp = async data => {
     if (!otp_data || otp_data.length === 0) return { success: false, message: 'otp not exist' }
     else if (otp_data[0].status === 'EXPIRED') return { success: false, message: 'otp expired' }
     else if (otp_data[0].status === 'LOCK') return { success: false, message: '3 times wrong, otp expired' }
+    else if (otp_data[0].status === 'VALID') return { success: false, message: 'otp already used' }
     else if (otp_data[0].value !== otp) {
         const status = otp_data[0].status === ('NEW' || 'VALID') ? '1-TIME-WRONG' : otp_data[0].status === '1-TIME-WRONG' ? '2-TIME-WRONG' : 'LOCK'
         const message = `otp incorrect, ${status === '1-TIME-WRONG' ? '2 times left' : status === '2-TIME-WRONG' ? '1 time left' : '3 times wrong, otp expired'}`
@@ -45,7 +46,7 @@ const signup = async data => {
         } else {
             const user = { username, password: hashed, role: 'client', company, contact_number, phone_code, address, created_at: moment().format('YYYY-MM-DD HH:mm:ss'), created_by: 'system' }
             await execute_query('create_item', user, 'user', db)
-            return { username, company, contact_number }
+            return { username, company, contact_number, phone_code, address }
         }
     } catch (err) {
         return err
