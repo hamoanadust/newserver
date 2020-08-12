@@ -20,9 +20,9 @@
         "acquireTimeout"  : 20000,
         "timeout"         : 20000,
         "host"     : "localhost",
-        "user"     : "dbadmin",
-        "password" : "1!qQ1234",
-        "database" : "new"
+        "user"     : "newuser",
+        "password" : "biddit1234",
+        "database" : "test"
     },
     "remote_mysql_db": {
         "connectionLimit" : 10,

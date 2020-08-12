@@ -50,6 +50,17 @@ invoice_router.route('/create_invoice')
     }
 })
 
+invoice_router.route('/delete_invoice')
+.post(verify_user, async (req, res, next) => {
+    try {
+        req.body.data.user = req.user
+        req.data = await invoice.delete_invoice(req.body.data)
+        next()
+    } catch (err) {
+        throw err
+    }
+})
+
 invoice_router.route('/list_invoice_for_admin')
 .post(verify_admin, async (req, res, next) => {
     try {

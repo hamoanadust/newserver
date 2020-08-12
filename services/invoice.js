@@ -186,6 +186,17 @@ const create_invoice = async data => {
     }
 }
 
+const delete_invoice = async data => {
+    try {
+        const { invoice_id, user } = data
+        const sql = `update invoice set status = 'DELETED' where invoice_id in (${db.escape(invoice_id)}) and buyer_id = ${db.escape(user.user_id)}`
+        const result = await db.query(sql)
+        return result
+    } catch (err) {
+        throw err
+    }
+}
+
 
 module.exports = {
     find_invoice,
@@ -193,4 +204,5 @@ module.exports = {
     list_invoice,
     list_invoice_for_admin,
     create_invoice,
+    delete_invoice
 }
