@@ -71,7 +71,7 @@ const checkout_invoice = async data => {
             // const member_season_id = seasons.filter(s => s.holder_type === 'TENANT').map(s => s.season_id)
             const ids = Array.isArray(invoice_id) ? invoice_id : [invoice_id]
             await Promise.all([
-                ...ids.map((id, i) => db.query(`update invoice set status = 'PAID', invoice_number = ${db.escape(`INV/${fill_zero(last_invoice_number_count + i)}/${moment().year()}`)} where invoice_id = ${db.escape(id)}`)),
+                ...ids.map((id, i) => db.query(`update invoice set status = 'PAID', invoice_number = ${db.escape(`INV/${fill_zero(last_invoice_number_count + i + 1)}/${moment().year()}`)} where invoice_id = ${db.escape(id)}`)),
                 // db.query(`update invoice set status = 'PAID', invoice_number =  where invoice_id in (${invoice_id.toString()})`),
                 db.query(`update season set status = 'ACTIVE' where season_id in (${season_id.toString()})`),
                 db.query(`update season set is_latest = false where first_season_id in (${first_season_id.toString()}) and is_latest = true and season_id not in (${season_id.toString()})`),
