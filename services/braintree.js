@@ -44,8 +44,9 @@ const checkout_invoice = async data => {
     try {
         const { paymentMethodNonce, invoice_id, user, payment_method_id } = data
         
-        const sql = `select i.*, s.season_id, s.first_season_id, s.is_latest, s.first_start_date from invoice i left join invoice_item it using (invoice_id) left join season s on it.season_id = s.season_id where i.invoice_id in (${invoice_id.toString()}) and i.status = 'OUTSTANDING'`
-        const [invoice, last_invoice] = await Promise.all([db.query(sql), list_item({ where: { status: 'PAID' }, limit: 1, orderby: 'invoice_id', orderdirection: 'desc', table: 'invoice' })])
+        const sql1 = `select i.*, s.season_id, s.first_season_id, s.is_latest, s.first_start_date from invoice i left join invoice_item it using (invoice_id) left join season s on it.season_id = s.season_id where i.invoice_id in (${invoice_id.toString()}) and i.status = 'OUTSTANDING'`
+        const sql2 = `select invoice_number from invoice where status = 'PAID' order by invoice_id desc limit 1`
+        const [invoice, last_invoice] = await Promise.all([db.query(sql1), db.query(sql2)])
         if (!invoice || invoice.length === 0) throw new Error('No outstanding invoice is found')
         else if (Array.isArray(invoice_id) && invoice_id.length !== invoice.length) throw new Error('Some of the outstanding invoices are not found')
         const last_invoice_number_count = last_invoice[0] ? parseInt(last_invoice[0].invoice_number.slice(4, 10)) : 1
