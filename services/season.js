@@ -86,15 +86,16 @@ const create_invoice = async data => {
         const invoice = await execute_query('create_item', item, 'invoice', db)
         if (!invoice) throw new Error('invoice create fail')
         const invoice_id = invoice.insertId
-        const invoice_number = `INV/${fill_zero(invoice_id)}/${moment().year()}`
+        // const invoice_number = `INV/${fill_zero(invoice_id)}/${moment().year()}`
+        const order_number = `ODR/${fill_zero(invoice_id)}/${moment().year()}`
         invoice_items = invoice_items.map(e => {
             return { ...e, invoice_id }
         })
         await Promise.all([
-            execute_query('update_item_by_id', { id: invoice_id, condition: { invoice_number } }, 'invoice', db),
+            execute_query('update_item_by_id', { id: invoice_id, condition: { order_number } }, 'invoice', db),
             ...invoice_items.map(e => execute_query('create_item', e, 'invoice_item', db))
         ])
-        return { ...item, invoice_number, invoice_id }
+        return { ...item, order_number, invoice_id }
     } catch(err) {
         throw err
     }

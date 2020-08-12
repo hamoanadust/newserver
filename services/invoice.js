@@ -6,13 +6,14 @@ const async = require("async");
 
 const find_invoice = async data => {
     try {
-        const { invoice_id, invoice_number, user } = data;
+        const { invoice_id, invoice_number, order_number, user } = data;
         const condition = {
             where: {
                 whereand: {
                     whereor: {
                         invoice_id,
-                        invoice_number
+                        invoice_number,
+                        order_number
                     },
                     buyer_id: user.user_id
                 }
