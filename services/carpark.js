@@ -22,7 +22,7 @@ const list_all_carpark = async () => {
         let result = []
         resp.forEach(r => {
             let exist = result.find(e => e.carpark_id === r.carpark_id)
-            const { ...carpark, season_rate_id, client_type, vehicle_type, season_type, rate, rate_updated_at, rate_updated_by, rate_status, rate_remarks, member_type_id, file_type, quota, available, member_type_status } = r
+            const { season_rate_id, client_type, vehicle_type, season_type, rate, rate_updated_at, rate_updated_by, rate_status, rate_remarks, member_type_id, file_type, quota, available, member_type_status, ...carpark } = r
             if (exist) {
                 exist.season_rate.push({ season_rate_id, client_type, vehicle_type, season_type, rate, rate_updated_at, rate_updated_by, rate_status, rate_remarks, member_type_id, file_type, quota, available, member_type_status })
             } else {
@@ -73,7 +73,7 @@ const get_carpark_detail = async data => {
         const resp = await db.query(sql)
         let result, season_rate = []
         resp.forEach((r, i) => {
-            const { ...carpark, season_rate_id, client_type, vehicle_type, season_type, rate, rate_updated_at, rate_updated_by, rate_status, rate_remarks, member_type_id, file_type, quota, available, member_type_status } = r
+            const { season_rate_id, client_type, vehicle_type, season_type, rate, rate_updated_at, rate_updated_by, rate_status, rate_remarks, member_type_id, file_type, quota, available, member_type_status, ...carpark } = r
             season_rate.push({ season_rate_id, client_type, vehicle_type, season_type, rate, rate_updated_at, rate_updated_by, rate_status, rate_remarks, member_type_id, file_type, quota, available, member_type_status })
             if (i === 0) {
                 result = carpark
