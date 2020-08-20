@@ -1,23 +1,14 @@
 const db = require('./db')
-const { execute_query } = require('./dao')
+const { execute_query, prepare_where } = require('./dao')
 const moment = require('moment')
 
 const list_carpark = data => {
     try {
-        let { whereand, limit, offset, orderby, orderdirection } = data
-        whereand = whereand || { carpark_id: { gt: 0 } }
-        const condition = { where: { whereand }, limit, offset, orderby, orderdirection }
-
-        `select * from (select c.*, sr.season_rate_id, sr.client_type, sr.vehicle_type, sr.season_type, sr.rate, sr.updated_at as rate_updated_at, sr.updated_by as rate_updated_by, sr.status as rate_status, sr.remarks as rate_remarks, mt.member_type_id, mt.file_type, mt.quota, mt.available, mt.status as member_type_status from carpark c left join season_rate sr using (carpark_id) left join member_type mt using (member_type_id)) as result where carpark_id = 1`
-        return execute_query('get_item_by_condition', condition, 'carpark', db)
-    } catch (err) {
-        return err
-    }
-}
-
-const list_all_carpark = async () => {
-    try {
-        const sql = `select * from (select c.*, sr.season_rate_id, sr.client_type, sr.vehicle_type, sr.season_type, sr.rate, sr.updated_at as rate_updated_at, sr.updated_by as rate_updated_by, sr.status as rate_status, sr.remarks as rate_remarks, mt.member_type_id, mt.file_type, mt.quota, mt.available, mt.status as member_type_status from carpark c left join season_rate sr using (carpark_id) left join member_type mt using (member_type_id)) as result where status = 'ACTIVE'`
+        let { where = { status: 'ACTIVE' }, limit, offset, orderby, orderdirection } = data
+        const order = orderby ? `order by ${orderby} ${orderdirection || 'desc'}` : ''
+        const limitation = limit === 'no' ? '' : `limit ${limit || '100'}`
+        const offsetion = offset ? `offset ${offset}` : ''
+        const sql = `select * from (select c.*, sr.season_rate_id, sr.client_type, sr.vehicle_type, sr.season_type, sr.rate, sr.updated_at as rate_updated_at, sr.updated_by as rate_updated_by, sr.status as rate_status, sr.remarks as rate_remarks, mt.member_type_id, mt.file_type, mt.quota, mt.available, mt.status as member_type_status from carpark c left join season_rate sr using (carpark_id) left join member_type mt using (member_type_id)) as result where ${prepare_where(where)} ${order} ${limitation} ${offsetion}`
         const resp = await db.query(sql)
         let result = []
         resp.forEach(r => {
@@ -34,6 +25,8 @@ const list_all_carpark = async () => {
         return err
     }
 }
+
+const list_all_carpark = async () => list_carpark({})
 
 const add_carpark = data => {
     try {
