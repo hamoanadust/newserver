@@ -53,6 +53,7 @@ rate INT UNSIGNED,
 updated_at datetime,
 updated_by VARCHAR(20),
 status ENUM('ACTIVE', 'INACTIVE') not null default 'ACTIVE',
+member_type_id int,
 remarks VARCHAR(1000),
 CONSTRAINT season_rate_id_pk PRIMARY KEY(season_rate_id)
 );
@@ -244,12 +245,25 @@ CREATE TABLE IF NOT EXISTS member (
     carpark_id int,
     user_id int,
     file_id int,
-    quota tinyint UNSIGNED default 255,
     status enum('ACTIVE', 'INACTIVE') not null default 'INACTIVE',
     created_at datetime,
     updated_at datetime,
     CONSTRAINT member_id_pk PRIMARY KEY(member_id)
 );
+
+
+CREATE TABLE IF NOT EXISTS member_type (
+    member_type_id SERIAL NOT NULL,
+    file_type varchar(50),
+    quota int,
+    available int,
+    status enum('ACTIVE', 'INACTIVE') not null default 'INACTIVE',
+    created_at datetime,
+    updated_at datetime,
+    CONSTRAINT member_type_id_pk PRIMARY KEY(member_type_id)
+);
+
+
 
 insert into iu_type (initial_number, vehicle_type) values
 ('{001, 002, 003, 004}', 'FREE'),

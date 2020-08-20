@@ -106,11 +106,79 @@ const remove_member_batch = async data => {
     }
 }
 
+//admin add new member_type
+//file_type is file required to apply this type of member, put null if no need file
+//quota is total membership allowed to apply, put null if no limit
+//available is how many membership left to apply, put null if no limit
+const create_member_type = async data => {
+    try {
+        const { file_type, quota, status = 'ACTIVE' } = data
+        const item = { file_type, quota, available: quota, status, created_at: moment().format('YYYY-MM-DD HH:mm:ss'), updated_at: moment().format('YYYY-MM-DD HH:mm:ss') }
+        const resp = await execute_query('create_item', item, 'member_type', db)
+        return resp
+    } catch (err) {
+        return err
+    }
+}
+
+//make changes on existing member_type, file_type, quota, available
+const edit_member_type = async data => {
+    try {
+        const { member_type_id, file_type, quota, available } = data
+        const condition = { file_type, quota, available, updated_at: moment().format('YYYY-MM-DD HH:mm:ss') }
+        const resp = await execute_query('update_item_by_id', { where: { member_type_id }, condition }, 'member_type', db)
+        return resp
+    } catch (err) {
+        return err
+    }
+}
+
+//invalid member_type also invalid all season_rate under this member_type
+const remove_member_type = async data => {
+    try {
+        const { member_type_id } = data
+        const resp = await execute_query('update_item_by_id', { where: { member_type_id }, condition: { status: 'INACTIVE' } }, 'member_type', db)
+        await execute_query('update_item_by_id', { where: { member_type_id }, condition: { status: 'INACTIVE' } }, 'season_rate', db)
+        return resp
+    } catch (err) {
+        return err
+    }
+}
+
+//update member_type quota
+const update_member_type = async data => {
+    try {
+        const { member_type_id, diff } = data
+        const sql = `update member_type set available = available + ${db.escape(diff)} where member_type_id = ${db.escape(member_type_id)}`
+        const resp = await db.query(sql)
+        return resp
+    } catch (err) {
+        return err
+    }
+}
+
+//when admin add new season_rate, list member_type first then attach it with the season_rate
+const list_member_type = async data => {
+    try {
+        const { where = { status: 'ACTIVE' } } = data
+        const resp = await execute_query('get_item_by_condition', { where }, 'member_type', db)
+        return resp
+    } catch (err) {
+        return err
+    }
+}
+
 module.exports = {
     apply_member,
     approve_member,
     list_member,
     list_member_for_admin,
     create_member_batch,
-    remove_member_batch
+    remove_member_batch,
+
+    create_member_type,
+    edit_member_type,
+    remove_member_type,
+    update_member_type,
+    list_member_type
 }
