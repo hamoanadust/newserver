@@ -2,7 +2,7 @@ const db = require('./db')
 const { execute_query, prepare_where } = require('./dao')
 const moment = require('moment')
 
-const list_carpark = data => {
+const list_carpark = async data => {
     try {
         let { where = { status: 'ACTIVE' }, limit, offset, orderby, orderdirection } = data
         const order = orderby ? `order by ${orderby} ${orderdirection || 'desc'}` : ''
@@ -26,7 +26,7 @@ const list_carpark = data => {
     }
 }
 
-const list_all_carpark = async () => list_carpark({})
+const list_all_carpark = () => list_carpark({})
 
 const add_carpark = data => {
     try {
