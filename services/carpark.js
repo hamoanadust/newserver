@@ -26,7 +26,7 @@ const list_carpark = async data => {
     }
 }
 
-const list_all_carpark = () => list_carpark({})
+const list_all_carpark = () => list_carpark({ where: { status: 'ACTIVE' } })
 
 const add_carpark = data => {
     try {
