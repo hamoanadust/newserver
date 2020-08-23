@@ -7,9 +7,10 @@ const moment = require('moment')
 
 const upload = async data => {
     try {
-        const { files: { file }, user: { user_id }, body: { file_type } } = data
+        const { files, user: { user_id }, body: { file_type } } = data
         if(!files) throw new Error('No file uploaded')
         const { file } = files
+        console.log(files)
         console.log(file)
         console.log(file_type)
         if(!file_type) throw new Error('file_type is required')
