@@ -226,9 +226,8 @@ CREATE TABLE IF NOT EXISTS announcement (
 
 CREATE TABLE IF NOT EXISTS file (
     file_id SERIAL NOT NULL,
-    carpark_id int,
     user_id int,
-    file_type enum('TENANT_FILE', 'GIRO_FORM') not null default 'TENANT_FILE',
+    file_type varchar(50),
     name varchar(20),
     file_name varchar(26),
     mimetype varchar(20),
@@ -242,7 +241,6 @@ CREATE TABLE IF NOT EXISTS file (
 
 CREATE TABLE IF NOT EXISTS member (
     member_id SERIAL NOT NULL,
-    carpark_id int,
     user_id int,
     file_id int,
     status enum('ACTIVE', 'INACTIVE') not null default 'INACTIVE',
@@ -254,6 +252,7 @@ CREATE TABLE IF NOT EXISTS member (
 
 CREATE TABLE IF NOT EXISTS member_type (
     member_type_id SERIAL NOT NULL,
+    carpark_id int,
     file_type varchar(50),
     quota int,
     available int,

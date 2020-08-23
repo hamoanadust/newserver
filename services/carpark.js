@@ -15,9 +15,9 @@ const list_carpark = async data => {
             let exist = result.find(e => e.carpark_id === r.carpark_id)
             const { season_rate_id, client_type, vehicle_type, season_type, rate, rate_updated_at, rate_updated_by, rate_status, rate_remarks, member_type_id, file_type, quota, available, member_type_status, ...carpark } = r
             if (exist) {
-                exist.season_rate.push({ season_rate_id, client_type, vehicle_type, season_type, rate, rate_updated_at, rate_updated_by, rate_status, rate_remarks, member_type_id, file_type, quota, available, member_type_status })
+                if (season_rate_id) exist.season_rate.push({ season_rate_id, client_type, vehicle_type, season_type, rate, rate_updated_at, rate_updated_by, rate_status, rate_remarks, member_type_id, file_type, quota, available, member_type_status })
             } else {
-                result.push({ ...carpark, season_rate: [ { season_rate_id, client_type, vehicle_type, season_type, rate, rate_updated_at, rate_updated_by, rate_status, rate_remarks, member_type_id, file_type, quota, available, member_type_status } ] })
+                result.push({ ...carpark, season_rate: season_rate_id ? [ { season_rate_id, client_type, vehicle_type, season_type, rate, rate_updated_at, rate_updated_by, rate_status, rate_remarks, member_type_id, file_type, quota, available, member_type_status } ] : [] })
             }
         })
         return result
@@ -30,7 +30,7 @@ const list_all_carpark = () => list_carpark({})
 
 const add_carpark = data => {
     try {
-        let { carpark_name, carpark_code, address, postal_code, public_policy = 'ALLOW', billing_method = 'CREDIT_CARD,PAYNOW,CHECK', allow_giro, allow_auto_renew, remarks, giro_form_id, allow_prorate, start_date, end_date, user } = data
+        let { carpark_name, carpark_code, address, postal_code, public_policy = 'ALLOW', billing_method = 'CREDIT_CARD,PAYNOW,CHECK', allow_giro = 1, allow_auto_renew = 1, remarks, giro_form_id, allow_prorate, start_date, end_date, user } = data
         if (!carpark_name) throw new Error('carpark_name is required')
         else if (!start_date) throw new Error('start_date is required')
         else if (!end_date) throw new Error('end_date is required')
@@ -67,7 +67,7 @@ const get_carpark_detail = async data => {
         let result, season_rate = []
         resp.forEach((r, i) => {
             const { season_rate_id, client_type, vehicle_type, season_type, rate, rate_updated_at, rate_updated_by, rate_status, rate_remarks, member_type_id, file_type, quota, available, member_type_status, ...carpark } = r
-            season_rate.push({ season_rate_id, client_type, vehicle_type, season_type, rate, rate_updated_at, rate_updated_by, rate_status, rate_remarks, member_type_id, file_type, quota, available, member_type_status })
+            if (season_rate_id) season_rate.push({ season_rate_id, client_type, vehicle_type, season_type, rate, rate_updated_at, rate_updated_by, rate_status, rate_remarks, member_type_id, file_type, quota, available, member_type_status })
             if (i === 0) {
                 result = carpark
             }

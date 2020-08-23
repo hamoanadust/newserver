@@ -2,21 +2,55 @@ const db = require('./db')
 const moment = require('moment')
 const { execute_query, prepare_where } = require('./dao')
 
+// const create_member = async data => {
+//     try {
+//         let { file_id, user_id, quota, status } = data
+//         status = status || 'INACTIVE'
+//         const condition = user_id ? { where: { whereand: { file_id, user_id } } } : { where: { file_id } }
+//         const condition2 = user_id ? { where: { whereand: { file_id, user_id, status: 'ACTIVE' } } } : { where: { whereand: { file_id, status: 'ACTIVE' } } }
+//         const resp = await Promise.all([
+//             execute_query('get_item_by_condition', condition, 'file', db),
+//             execute_query('get_item_by_condition', condition2, 'member', db)
+//         ])
+//         if (!resp[0] || resp[0].length === 0) throw new Error('file not found')
+//         if (resp[1] && resp[1].length > 0) throw new Error('member already exist')
+//         const { carpark_id } = resp[0]
+//         user_id = user_id || resp[0].user_id
+//         const item = { file_id, user_id, carpark_id, quota, status, created_at: moment().format('YYYY-MM-DD HH:mm:ss'), updated_at: moment().format('YYYY-MM-DD HH:mm:ss') }
+//         const member = await execute_query('create_item', item, 'member', db)
+//         return { ...item, member_id: member.insertId }
+//     } catch (err) {
+//         return err
+//     }
+// }
+
+// const apply_member = async data => {
+//     try {
+//         const { file_id, user } = data
+//         const { user_id } = user
+//         return create_member({ file_id, user_id })
+//     } catch (err) {
+//         return err
+//     }
+// }
+
 const create_member = async data => {
     try {
-        let { file_id, user_id, quota, status } = data
-        status = status || 'INACTIVE'
-        const condition = user_id ? { where: { whereand: { file_id, user_id } } } : { where: { file_id } }
-        const condition2 = user_id ? { where: { whereand: { file_id, user_id, status: 'ACTIVE' } } } : { where: { whereand: { file_id, status: 'ACTIVE' } } }
-        const resp = await Promise.all([
-            execute_query('get_item_by_condition', condition, 'file', db),
-            execute_query('get_item_by_condition', condition2, 'member', db)
+        let { file_id, user_id, member_type_id, status = 'INACTIVE' } = data
+        const [mt, mbr] = await Promise.all([
+            execute_query('get_item_by_condition', { where: { member_type_id } }, 'member_type', db),
+            execute_query('get_item_by_condition', { where: { whereand: { member_type_id, user_id, status: 'ACTIVE' } } }, 'member', db)
         ])
-        if (!resp[0] || resp[0].length === 0) throw new Error('file not found')
-        if (resp[1] && resp[1].length > 0) throw new Error('member already exist')
-        const { carpark_id } = resp[0]
-        user_id = user_id || resp[0].user_id
-        const item = { file_id, user_id, carpark_id, quota, status, created_at: moment().format('YYYY-MM-DD HH:mm:ss'), updated_at: moment().format('YYYY-MM-DD HH:mm:ss') }
+        if (!mt || mt.length === 0) throw new Error('member_type not found')
+        if (mbr && mbr.length > 0) throw new Error('member already exist')
+        const { file_type, available , quota } = mt[0]
+        if (quota > 0 && available <= 0) throw new Error('membership is fully applied')
+        if (file_type) {
+            if (!file_id) throw new Error(`application file ${file_type} is required`)
+            const fl = await execute_query('get_item_by_condition', { where: { whereand: { file_id, file_type } } }, 'file', db)
+            if (!fl || fl.length === 0) throw new Error('file not found')
+        }
+        const item = { file_id, user_id, member_type_id, status, created_at: moment().format('YYYY-MM-DD HH:mm:ss'), updated_at: moment().format('YYYY-MM-DD HH:mm:ss') }
         const member = await execute_query('create_item', item, 'member', db)
         return { ...item, member_id: member.insertId }
     } catch (err) {
@@ -26,8 +60,7 @@ const create_member = async data => {
 
 const apply_member = async data => {
     try {
-        const { file_id, user } = data
-        const { user_id } = user
+        const { member_type_id, file_id, user: { user_id } } = data
         return create_member({ file_id, user_id })
     } catch (err) {
         return err
@@ -112,8 +145,8 @@ const remove_member_batch = async data => {
 //available is how many membership left to apply, put null if no limit
 const create_member_type = async data => {
     try {
-        const { file_type, quota, status = 'ACTIVE' } = data
-        const item = { file_type, quota, available: quota, status, created_at: moment().format('YYYY-MM-DD HH:mm:ss'), updated_at: moment().format('YYYY-MM-DD HH:mm:ss') }
+        const { carpark_id, file_type, quota, status = 'ACTIVE' } = data
+        const item = { carpark_id, file_type, quota, available: quota, status, created_at: moment().format('YYYY-MM-DD HH:mm:ss'), updated_at: moment().format('YYYY-MM-DD HH:mm:ss') }
         const resp = await execute_query('create_item', item, 'member_type', db)
         return resp
     } catch (err) {
@@ -124,8 +157,8 @@ const create_member_type = async data => {
 //make changes on existing member_type, file_type, quota, available
 const edit_member_type = async data => {
     try {
-        const { member_type_id, file_type, quota, available } = data
-        const condition = { file_type, quota, available, updated_at: moment().format('YYYY-MM-DD HH:mm:ss') }
+        const { member_type_id, carpark_id, file_type, quota, available } = data
+        const condition = { carpark_id, file_type, quota, available, updated_at: moment().format('YYYY-MM-DD HH:mm:ss') }
         const resp = await execute_query('update_item_by_id', { where: { member_type_id }, condition }, 'member_type', db)
         return resp
     } catch (err) {

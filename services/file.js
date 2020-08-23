@@ -7,21 +7,15 @@ const moment = require('moment')
 
 const upload = async data => {
     try {
-        const { files, user, body } = data
-        if(!files) throw new Error('No file uploaded')
-        if(!body || !body.carpark_id) throw new Error('carpark_id is required')
-        const { file } = files
-        const { user_id } = user
-        let { carpark_id, file_type } = body
-        file_type = file_type || 'TENANT_FILE'
+        const { files: { file }, user: { user_id }, body: { file_type } } = data
+        if(!file) throw new Error('No file uploaded')
+        if(!file_type) throw new Error('file_type is required')
         const { name, mimetype, size } = file
-        
-        if (!fs.existsSync(path.join(__dirname, `/../uploads/${carpark_id}`))) fs.mkdirSync(path.join(__dirname, `/../uploads/${carpark_id}`), { recursive: true })
-        if (!fs.existsSync(path.join(__dirname, `/../uploads/${carpark_id}/${user_id}`))) fs.mkdirSync(path.join(__dirname, `/../uploads/${carpark_id}/${user_id}`), { recursive: true })
+        if (!fs.existsSync(path.join(__dirname, `/../../uploads/${user_id}`))) fs.mkdirSync(path.join(__dirname, `/../../uploads/${user_id}`), { recursive: true })
         const file_name = `${name}${generate_random_integer()}`
-        const file_path = path.join(__dirname, `/../uploads/${carpark_id}/${user_id}/`) + file_name
-        file.mv(`./uploads/${carpark_id}/${user_id}/${file_name}`)
-        const createFile = await create_file({ file_name, name, mimetype, size, carpark_id, user_id, file_path, file_type })
+        const file_path = path.join(__dirname, `/../../uploads/${user_id}/`) + file_name
+        file.mv(`./uploads/${user_id}/${file_name}`)
+        const createFile = await create_file({ file_name, name, mimetype, size, user_id, file_path, file_type })
         return createFile
     } catch(err) {
         throw err
@@ -49,8 +43,8 @@ const upload_file_for_admin = async data => {
 
 const create_file = async data => {
     try {
-        const { file_name, name, mimetype, size, carpark_id, user_id, file_path, file_type } = data
-        const item = { file_name, name, mimetype, size, carpark_id, user_id, file_path, file_type, status: 'ACTIVE', created_at: moment().format('YYYY-MM-DD HH:mm:ss'), updated_at: moment().format('YYYY-MM-DD HH:mm:ss') }
+        const { file_name, name, mimetype, size, user_id, file_path, file_type } = data
+        const item = { file_name, name, mimetype, size, user_id, file_path, file_type, status: 'ACTIVE', created_at: moment().format('YYYY-MM-DD HH:mm:ss'), updated_at: moment().format('YYYY-MM-DD HH:mm:ss') }
         const file = await execute_query('create_item', item, 'file', db)
         return { ...item, file_id: file.insertId }
     } catch(err) {
