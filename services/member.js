@@ -61,7 +61,7 @@ const create_member = async data => {
 const apply_member = async data => {
     try {
         const { member_type_id, file_id, user: { user_id } } = data
-        return create_member({ file_id, user_id })
+        return create_member({ file_id, user_id, member_type_id })
     } catch (err) {
         return err
     }
