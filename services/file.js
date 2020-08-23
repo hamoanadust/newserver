@@ -8,7 +8,10 @@ const moment = require('moment')
 const upload = async data => {
     try {
         const { files: { file }, user: { user_id }, body: { file_type } } = data
-        if(!file) throw new Error('No file uploaded')
+        if(!files) throw new Error('No file uploaded')
+        const { file } = files
+        console.log(file)
+        console.log(file_type)
         if(!file_type) throw new Error('file_type is required')
         const { name, mimetype, size } = file
         if (!fs.existsSync(path.join(__dirname, `/../../uploads/${user_id}`))) fs.mkdirSync(path.join(__dirname, `/../../uploads/${user_id}`), { recursive: true })
