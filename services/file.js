@@ -7,7 +7,7 @@ const moment = require('moment')
 
 const upload = async data => {
     try {
-        const { files, user: { user_id }, body: { file_type } } = data
+        const { files, user: { user_id }, file_type } = data
         if(!files) throw new Error('No file uploaded')
         const { file } = files
         console.log(files)
@@ -28,9 +28,8 @@ const upload = async data => {
 
 const upload_file = async data => {
     try {
-        let { files, user, body } = data
-        body.file_type = 'TENANT_FILE'
-        return upload({ files, user, body })
+        let { files, user, body: { file_type } } = data
+        return upload({ files, user, file_type })
     } catch(err) {
         return err
     }
