@@ -52,6 +52,7 @@ const create_member = async data => {
         }
         const item = { file_id, user_id, member_type_id, status, created_at: moment().format('YYYY-MM-DD HH:mm:ss'), updated_at: moment().format('YYYY-MM-DD HH:mm:ss') }
         const member = await execute_query('create_item', item, 'member', db)
+        await update_member_type({ member_type_id, diff: -1 })
         return { ...item, member_id: member.insertId }
     } catch (err) {
         return err
@@ -69,11 +70,10 @@ const apply_member = async data => {
 
 const approve_member = async data => {
     try {
-        let { member_id, quota } = data
-        quota = quota || 255
+        let { member_id } = data
         const member = await list_member_for_admin({ where: { member_id } })
         if (!member || member.length === 0) throw new Error('member not found')
-        await execute_query('update_item_by_id', { id: member_id, condition: { status: 'ACTIVE', quota } }, 'member', db)
+        await execute_query('update_item_by_id', { id: member_id, condition: { status: 'ACTIVE' } }, 'member', db)
         return true
     } catch (err) {
         return err
@@ -96,7 +96,7 @@ const list_member = async data => {
         const order = orderby ? `order by ${orderby} ${orderdirection || 'desc'}` : '';
         const limitation = limit === 'no' ? '' : `limit ${limit || '100'}`;
         const offsetion = offset ? `offset ${offset}` : '';
-        const sql = `select m.member_id, m.user_id, m.carpark_id, m.status as member_status, m.file_id, f.file_type, f.name, f.status as file_status, u.username, u.name, u.company, u.contact_number, u.email, c.carpark_name, c.carpark_code, c.address as carpark_address, c.postal_code, c.public_policy, c.billing_method, c.allow_auto_renew, c.allow_giro, c.status as carpark_status, c.remarks from member m left join file f using(file_id) left join user u on m.user_id = u.user_id left join carpark c on m.carpark_id = c.carpark_id where ${prepare_where(where, db)} ${order} ${limitation} ${offsetion}`
+        const sql = `select m.member_id, m.member_type_id, m.user_id, m.status as member_status, m.file_id, f.file_type, f.name, f.status as file_status, u.username, u.name, u.company, u.contact_number, u.email, mt.quota, mt.available, mt.carpark_id, mt.status as member_type_status, c.carpark_name, c.carpark_code, c.address as carpark_address, c.postal_code, c.public_policy, c.billing_method, c.allow_auto_renew, c.allow_giro, c.status as carpark_status, c.remarks from member m left join file f using(file_id) left join user u on m.user_id = u.user_id left join member_type mt using(member_type_id) left join carpark c on mt.carpark_id = c.carpark_id where ${prepare_where(where, db)} ${order} ${limitation} ${offsetion}`
         const member = await db.query(sql)
         return member
     } catch (err) {
@@ -111,7 +111,7 @@ const list_member_for_admin = async data => {
         const order = orderby ? `order by ${orderby} ${orderdirection || 'desc'}` : '';
         const limitation = limit === 'no' ? '' : `limit ${limit || '100'}`;
         const offsetion = offset ? `offset ${offset}` : '';
-        const sql = `select m.member_id, m.user_id, m.carpark_id, m.status as member_status, m.file_id, f.file_type, f.name, f.file_name, f.mimetype, f.size, f.file_path, f.status as file_status, u.username, u.name, u.company, u.contact_number, u.email, c.carpark_name, c.carpark_code, c.address as carpark_address, c.postal_code, c.public_policy, c.billing_method, c.allow_auto_renew, c.allow_giro, c.status as carpark_status, c.remarks from member m left join file f using(file_id) left join user u on m.user_id = u.user_id left join carpark c on m.carpark_id = c.carpark_id where ${prepare_where(where, db)} ${order} ${limitation} ${offsetion}`
+        const sql = `select m.member_id, m.user_id, m.member_type_id, m.status as member_status, m.file_id, f.file_type, f.name, f.file_name, f.mimetype, f.size, f.file_path, f.status as file_status, u.username, u.name, u.company, u.contact_number, u.email, mt.quota, mt.available, mt.carpark_id, mt.status as member_type_status, c.carpark_name, c.carpark_code, c.address as carpark_address, c.postal_code, c.public_policy, c.billing_method, c.allow_auto_renew, c.allow_giro, c.status as carpark_status, c.remarks from member m left join file f using(file_id) left join user u on m.user_id = u.user_id left join member_type using(member_type_id) left join carpark c on mt.carpark_id = c.carpark_id where ${prepare_where(where, db)} ${order} ${limitation} ${offsetion}`
         const member = await db.query(sql)
         return member
     } catch (err) {
@@ -121,8 +121,9 @@ const list_member_for_admin = async data => {
 
 const create_member_batch = async data => {
     try {
-        const { files, user } = data
-        const resp = await Promise.all(files.map(f => create_member({ file_id: f.file_id, quota: f.quota, status: 'ACTIVE' })))
+        const { files, member_type_id, user } = data
+        if (!member_type_id) throw new Error('member_type_id is required')
+        const resp = await Promise.all(files.map(f => create_member({ file_id: f.file_id, member_type_id, status: 'ACTIVE' })))
         return resp
     } catch (err) {
         return err
