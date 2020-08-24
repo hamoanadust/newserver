@@ -115,8 +115,8 @@ const add_season_type = async data => {
 const list_season_type = async data => {
     try {
         const condition = { where: { status: 'ACTIVE' } }
-        await execute_query('get_item_by_condition', condition, 'season_type', db)
-        return true
+        const resp = await execute_query('get_item_by_condition', condition, 'season_type', db)
+        return resp
     } catch (err) {
         return err
     }

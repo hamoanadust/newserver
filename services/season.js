@@ -120,15 +120,16 @@ const add_season_with_invoice = async data => {
         attn = attn || 'system'
         card_type = card_type || 'IU'
         vehicle_type = vehicle_type || 'CAR'
+        holder_id = holder_id || (user ? user.user_id : undefined)
         const [vehicle, holder_data, member_data] = await Promise.all([
             vehicle_id ? execute_query('get_item_by_condition', { where: { vehicle_id } }, 'vehicle', db) : undefined,
             holder_id ? execute_query('get_item_by_condition', { where: { user_id: holder_id }, limit: 1 }, 'user', db) : undefined,
-            holder_id || user.user_id ? execute_query('get_item_by_condition', { where: { whereand: { user_id: holder_id || user.user_id, carpark_id, status: 'ACTIVE', quota: { gt: 0 } } }, limit: 1}, 'member', db) : undefined,
+            holder_id ? db.query(`select mt.*, m.user_id, m.file_id from member_type mt left join member m using (member_type_id) where mt.carpark_id = ${db.escape(carpark_id)} and m.user_id = ${db.escape(holder_id)} and mt.status = 'ACTIVE' and m.status = 'ACTIVE' and mt.available > 0`) : undefined
         ])
         const holder_type = member_data && member_data[0] ? 'TENANT' : 'PUBLIC'
         const holder = holder_data && holder_data.length === 1 ? holder_data[0] : undefined
         vehicle_number = vehicle_number || (vehicle && vehicle.length === 1 ? vehicle[0].vehicle_number : '')
-        holder_id = holder_id || (user ? user.user_id : undefined)
+        
         holder_name = holder_name || (holder ? holder.name : undefined) || (user ? user.name : '')
         holder_company = holder_company || (holder ? holder.company : undefined) || (user ? user.company : '')
         holder_address = holder_address || (holder ? holder.address : undefined) || (user ? user.address : '')
@@ -216,7 +217,7 @@ const add_season_by_admin = async data => {
         const { carpark_id, start_date, end_date, card_number, vehicle_number, card_type, vehicle_type, season_type = 'NORMAL', attn, user_id, user } = data
         const [holder, member] = await Promise.all([
             execute_query('get_item_by_condition', { where: { user_id }, limit: 1 }, 'user', db),
-            execute_query('get_item_by_condition', { where: { whereand: { user_id, carpark_id, status: 'ACTIVE', quota: { gt: 0 } } }, limit: 1 }, 'member', db)
+            db.query(`select mt.*, m.user_id, m.file_id from member_type mt left join member m using (member_type_id) where mt.carpark_id = ${db.escape(carpark_id)} and m.user_id = ${db.escape(user_id)} and mt.status = 'ACTIVE' and m.status = 'ACTIVE' and mt.available > 0`)
         ])
         if (!holder && holder.length === 0) throw new Error('user not found')
         const holder_type = member && member[0] ? 'TENANT' : 'PUBLIC'
