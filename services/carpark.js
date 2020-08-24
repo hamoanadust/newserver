@@ -8,7 +8,7 @@ const list_carpark = async data => {
         const order = orderby ? `order by ${orderby} ${orderdirection || 'desc'}` : ''
         const limitation = limit === 'no' ? '' : `limit ${limit || '100'}`
         const offsetion = offset ? `offset ${offset}` : ''
-        const sql = `select * from (select c.*, sr.season_rate_id, sr.client_type, sr.vehicle_type, sr.season_type, sr.rate, sr.updated_at as rate_updated_at, sr.updated_by as rate_updated_by, sr.status as rate_status, sr.remarks as rate_remarks, mt.member_type_id, mt.file_type, mt.quota, mt.available, mt.status as member_type_status from carpark c left join season_rate sr using (carpark_id) left join member_type mt using (member_type_id)) as result where ${prepare_where(where, db)} ${order} ${limitation} ${offsetion}`
+        const sql = `select * from (select c.*, sr.season_rate_id, sr.client_type, sr.vehicle_type, sr.season_type, sr.rate, sr.updated_at as rate_updated_at, sr.updated_by as rate_updated_by, sr.status as rate_status, sr.remarks as rate_remarks, mt.member_type_id, mt.file_type, mt.quota, mt.available, mt.status as member_type_status, st.file_type as st_file_type from carpark c left join season_rate sr using (carpark_id) left join member_type mt using (member_type_id) left join season_type st on st.season_type_id = sr.season_type) as result where ${prepare_where(where, db)} ${order} ${limitation} ${offsetion}`
         const resp = await db.query(sql)
         let result = []
         resp.forEach(r => {
