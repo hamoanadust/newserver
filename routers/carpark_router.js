@@ -85,6 +85,30 @@ carpark_router.route('/modify_season_rate')
     }
 })
 
+carpark_router.route('/add_season_type')
+.post(verify_admin, async (req, res, next) => {
+    try {
+        req.body.data.user = req.user
+        req.data = await carpark.add_season_type(req.body.data)
+        next()
+    } catch (err) {
+        req.data = err
+        next()
+    }
+})
+
+carpark_router.route('/list_season_type')
+.post(verify_admin, async (req, res, next) => {
+    try {
+        req.body.data.user = req.user
+        req.data = await carpark.list_season_type(req.body.data)
+        next()
+    } catch (err) {
+        req.data = err
+        next()
+    }
+})
+
 module.exports = {
     carpark_router
 }

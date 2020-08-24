@@ -101,6 +101,28 @@ const modify_season_rate = async data => {
     }
 }
 
+const add_season_type = async data => {
+    try {
+        const { season_type_id, file_type } = data
+        const item = { season_type_id, file_type, status: 'ACTIVE', created_at: moment().format('YYYY-MM-DD HH:mm:ss'),updated_at: moment().format('YYYY-MM-DD HH:mm:ss') }
+        await execute_query('create_item', item, 'season_type', db)
+        return true
+    } catch (err) {
+        return err
+    }
+}
+
+const list_season_type = async data => {
+    try {
+        const condition = { where: { status: 'ACTIVE' } }
+        await execute_query('get_item_by_condition', condition, 'season_type', db)
+        return true
+    } catch (err) {
+        return err
+    }
+}
+
+
 module.exports = {
     list_carpark,
     list_all_carpark,
@@ -108,5 +130,7 @@ module.exports = {
     modify_carpark,
     get_carpark_detail,
     add_season_rate,
-    modify_season_rate
+    modify_season_rate,
+    add_season_type,
+    list_season_type
 }

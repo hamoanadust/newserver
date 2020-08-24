@@ -80,6 +80,7 @@ holder_address varchar(200),
 holder_contact_number varchar(20),
 holder_email varchar(50),
 holder_type ENUM('TENANT', 'PUBLIC', 'VIP'),
+file_id int,
 created_at datetime,
 updated_at datetime,
 created_by varchar(35),
@@ -249,7 +250,6 @@ CREATE TABLE IF NOT EXISTS member (
     CONSTRAINT member_id_pk PRIMARY KEY(member_id)
 );
 
-
 CREATE TABLE IF NOT EXISTS member_type (
     member_type_id SERIAL NOT NULL,
     carpark_id int,
@@ -262,6 +262,14 @@ CREATE TABLE IF NOT EXISTS member_type (
     CONSTRAINT member_type_id_pk PRIMARY KEY(member_type_id)
 );
 
+CREATE TABLE IF NOT EXISTS season_type (
+    season_type_id varchar(30),
+    file_type varchar(50),
+    status enum('ACTIVE', 'INACTIVE') not null default 'INACTIVE',
+    created_at datetime,
+    updated_at datetime,
+    CONSTRAINT season_type_id_pk PRIMARY KEY(season_type_id)
+);
 
 
 insert into iu_type (initial_number, vehicle_type) values

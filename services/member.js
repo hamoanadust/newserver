@@ -2,38 +2,6 @@ const db = require('./db')
 const moment = require('moment')
 const { execute_query, prepare_where } = require('./dao')
 
-// const create_member = async data => {
-//     try {
-//         let { file_id, user_id, quota, status } = data
-//         status = status || 'INACTIVE'
-//         const condition = user_id ? { where: { whereand: { file_id, user_id } } } : { where: { file_id } }
-//         const condition2 = user_id ? { where: { whereand: { file_id, user_id, status: 'ACTIVE' } } } : { where: { whereand: { file_id, status: 'ACTIVE' } } }
-//         const resp = await Promise.all([
-//             execute_query('get_item_by_condition', condition, 'file', db),
-//             execute_query('get_item_by_condition', condition2, 'member', db)
-//         ])
-//         if (!resp[0] || resp[0].length === 0) throw new Error('file not found')
-//         if (resp[1] && resp[1].length > 0) throw new Error('member already exist')
-//         const { carpark_id } = resp[0]
-//         user_id = user_id || resp[0].user_id
-//         const item = { file_id, user_id, carpark_id, quota, status, created_at: moment().format('YYYY-MM-DD HH:mm:ss'), updated_at: moment().format('YYYY-MM-DD HH:mm:ss') }
-//         const member = await execute_query('create_item', item, 'member', db)
-//         return { ...item, member_id: member.insertId }
-//     } catch (err) {
-//         return err
-//     }
-// }
-
-// const apply_member = async data => {
-//     try {
-//         const { file_id, user } = data
-//         const { user_id } = user
-//         return create_member({ file_id, user_id })
-//     } catch (err) {
-//         return err
-//     }
-// }
-
 const create_member = async data => {
     try {
         let { file_id, user_id, member_type_id, status = 'INACTIVE' } = data
@@ -141,6 +109,7 @@ const remove_member_batch = async data => {
 }
 
 //admin add new member_type
+//carpark_id
 //file_type is file required to apply this type of member, put null if no need file
 //quota is total membership allowed to apply, put null if no limit
 //available is how many membership left to apply, put null if no limit
@@ -155,7 +124,7 @@ const create_member_type = async data => {
     }
 }
 
-//make changes on existing member_type, file_type, quota, available
+//make changes on existing member_type, file_type, quota, available, carpark_id
 const edit_member_type = async data => {
     try {
         const { member_type_id, carpark_id, file_type, quota, available } = data
