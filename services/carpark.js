@@ -13,11 +13,11 @@ const list_carpark = async data => {
         let result = []
         resp.forEach(r => {
             let exist = result.find(e => e.carpark_id === r.carpark_id)
-            const { season_rate_id, client_type, vehicle_type, season_type, rate, rate_updated_at, rate_updated_by, rate_status, rate_remarks, member_type_id, file_type, quota, available, member_type_status, ...carpark } = r
+            const { season_rate_id, client_type, vehicle_type, season_type, rate, rate_updated_at, rate_updated_by, rate_status, rate_remarks, member_type_id, file_type, quota, available, member_type_status, st_file_type, ...carpark } = r
             if (exist) {
-                if (season_rate_id) exist.season_rate.push({ season_rate_id, client_type, vehicle_type, season_type, rate, rate_updated_at, rate_updated_by, rate_status, rate_remarks, member_type_id, file_type, quota, available, member_type_status })
+                if (season_rate_id) exist.season_rate.push({ season_rate_id, client_type, vehicle_type, season_type, rate, rate_updated_at, rate_updated_by, rate_status, rate_remarks, member_type_id, file_type, quota, available, member_type_status, st_file_type })
             } else {
-                result.push({ ...carpark, season_rate: season_rate_id ? [ { season_rate_id, client_type, vehicle_type, season_type, rate, rate_updated_at, rate_updated_by, rate_status, rate_remarks, member_type_id, file_type, quota, available, member_type_status } ] : [] })
+                result.push({ ...carpark, season_rate: season_rate_id ? [ { season_rate_id, client_type, vehicle_type, season_type, rate, rate_updated_at, rate_updated_by, rate_status, rate_remarks, member_type_id, file_type, quota, available, member_type_status, st_file_type } ] : [] })
             }
         })
         return result
@@ -62,12 +62,12 @@ const get_carpark_detail = async data => {
     try {
         const { carpark_id } = data
         if (!carpark_id) throw new Error('carpark_id is required')
-        const sql = `select * from (select c.*, sr.season_rate_id, sr.client_type, sr.vehicle_type, sr.season_type, sr.rate, sr.updated_at as rate_updated_at, sr.updated_by as rate_updated_by, sr.status as rate_status, sr.remarks as rate_remarks, mt.member_type_id, mt.file_type, mt.quota, mt.available, mt.status as member_type_status from carpark c left join season_rate sr using (carpark_id) left join member_type mt using (member_type_id)) as result where carpark_id = ${db.escape(carpark_id)}`
+        const sql = `select * from (select c.*, sr.season_rate_id, sr.client_type, sr.vehicle_type, sr.season_type, sr.rate, sr.updated_at as rate_updated_at, sr.updated_by as rate_updated_by, sr.status as rate_status, sr.remarks as rate_remarks, mt.member_type_id, mt.file_type, mt.quota, mt.available, mt.status as member_type_status, st.file_type as st_file_type from carpark c left join season_rate sr using (carpark_id) left join member_type mt using (member_type_id) left join season_type st on st.season_type_id = sr.season_type) as result where carpark_id = ${db.escape(carpark_id)}`
         const resp = await db.query(sql)
         let result, season_rate = []
         resp.forEach((r, i) => {
-            const { season_rate_id, client_type, vehicle_type, season_type, rate, rate_updated_at, rate_updated_by, rate_status, rate_remarks, member_type_id, file_type, quota, available, member_type_status, ...carpark } = r
-            if (season_rate_id) season_rate.push({ season_rate_id, client_type, vehicle_type, season_type, rate, rate_updated_at, rate_updated_by, rate_status, rate_remarks, member_type_id, file_type, quota, available, member_type_status })
+            const { season_rate_id, client_type, vehicle_type, season_type, rate, rate_updated_at, rate_updated_by, rate_status, rate_remarks, member_type_id, file_type, quota, available, member_type_status, st_file_type, ...carpark } = r
+            if (season_rate_id) season_rate.push({ season_rate_id, client_type, vehicle_type, season_type, rate, rate_updated_at, rate_updated_by, rate_status, rate_remarks, member_type_id, file_type, quota, available, member_type_status, st_file_type })
             if (i === 0) {
                 result = carpark
             }
