@@ -28,7 +28,8 @@ carpark_router.route('/list_all_carpark')
 carpark_router.route('/list_my_carpark')
 .post(verify_user, async (req, res, next) => {
     try {
-        req.data = await carpark.list_my_carpark()
+        req.body.data.user = req.user
+        req.data = await carpark.list_my_carpark(req.body.data)
         next()
     } catch (err) {
         req.data = err
@@ -63,7 +64,6 @@ carpark_router.route('/modify_carpark')
 carpark_router.route('/get_carpark_detail')
 .post(async (req, res, next) => {
     try {
-        req.body.data.user = req.user
         req.data = await carpark.get_carpark_detail(req.body.data)
         next()
     } catch (err) {
