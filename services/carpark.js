@@ -4,11 +4,11 @@ const moment = require('moment')
 
 const list_carpark = async data => {
     try {
-        let { where = { status: 'ACTIVE' }, limit, offset, orderby, orderdirection } = data
+        let { where = { whereand: { status: 'ACTIVE', rate_status: 'ACTIVE' } }, limit, offset, orderby, orderdirection } = data
         const order = orderby ? `order by ${orderby} ${orderdirection || 'desc'}` : ''
         const limitation = limit === 'no' ? '' : `limit ${limit || '100'}`
         const offsetion = offset ? `offset ${offset}` : ''
-        const sql = `select * from (select c.*, sr.season_rate_id, sr.client_type, sr.vehicle_type, sr.season_type, sr.rate, sr.updated_at as rate_updated_at, sr.updated_by as rate_updated_by, sr.status as rate_status, sr.remarks as rate_remarks, mt.member_type_id, mt.file_type, mt.quota, mt.available, mt.status as member_type_status, st.file_type as st_file_type from carpark c left join season_rate sr using (carpark_id) left join member_type mt using (member_type_id) left join season_type st on st.season_type_id = sr.season_type) as result where ${prepare_where(where, db)} ${order} ${limitation} ${offsetion}`
+        const sql = `select * from (select c.*, sr.season_rate_id, sr.client_type, sr.vehicle_type, sr.season_type, sr.rate, sr.updated_at as rate_updated_at, sr.updated_by as rate_updated_by, sr.status as rate_status, sr.remarks as rate_remarks, mt.member_type_id, mt.file_type, mt.quota, mt.available, mt.status as member_type_status, st.file_type as st_file_type from carpark c left join season_rate sr using (carpark_id) left join member_type mt using (member_type_id) left join season_type st on st.season_type_id = sr.season_type where c.status = 'ACTIVE' and sr.status = 'ACTIVE') as result where ${prepare_where(where, db)} ${order} ${limitation} ${offsetion}`
         const resp = await db.query(sql)
         let result = []
         resp.forEach(r => {
@@ -26,7 +26,35 @@ const list_carpark = async data => {
     }
 }
 
+const get_carpark_detail = data => list_carpark({ where: { carpark_id: data.carpark_id } })
+
+const get_my_carpark_detail = data => list_my_carpark({ where: { carpark_id: data.carpark_id }, user: data.user })
+
 const list_all_carpark = () => list_carpark({})
+
+const list_my_carpark = async data => {
+    try {
+        let { where = { whereand: { status: 'ACTIVE', rate_status: 'ACTIVE' } }, limit, offset, orderby, orderdirection, user: { user_id } } = data
+        const order = orderby ? `order by ${orderby} ${orderdirection || 'desc'}` : ''
+        const limitation = limit === 'no' ? '' : `limit ${limit || '100'}`
+        const offsetion = offset ? `offset ${offset}` : ''
+        const sql = `select * from (select c.*, sr.season_rate_id, sr.client_type, sr.vehicle_type, sr.season_type, sr.rate, sr.updated_at as rate_updated_at, sr.updated_by as rate_updated_by, sr.status as rate_status, sr.remarks as rate_remarks, mt.member_type_id, mt.file_type, mt.quota, mt.available, mt.status as member_type_status, st.file_type as st_file_type, m.member_id, m.user_id from carpark c left join season_rate sr using (carpark_id) left join member_type mt using (member_type_id) left join season_type st on st.season_type_id = sr.season_type left join member m using(member_type_id) where c.status = 'ACTIVE' and sr.status = 'ACTIVE') as result where (member_type_id is null or user_id = ${db.escape(user_id)}) and (${prepare_where(where, db)}) ${order} ${limitation} ${offsetion}`
+        const resp = await db.query(sql)
+        let result = []
+        resp.forEach(r => {
+            let exist = result.find(e => e.carpark_id === r.carpark_id)
+            const { season_rate_id, client_type, vehicle_type, season_type, rate, rate_updated_at, rate_updated_by, rate_status, rate_remarks, member_type_id, file_type, quota, available, member_type_status, st_file_type, member_id, user_id, ...carpark } = r
+            if (exist) {
+                if (season_rate_id) exist.season_rate.push({ season_rate_id, client_type, vehicle_type, season_type, rate, rate_updated_at, rate_updated_by, rate_status, rate_remarks, member_type_id, file_type, quota, available, member_type_status, st_file_type, member_id, user_id })
+            } else {
+                result.push({ ...carpark, season_rate: season_rate_id ? [ { season_rate_id, client_type, vehicle_type, season_type, rate, rate_updated_at, rate_updated_by, rate_status, rate_remarks, member_type_id, file_type, quota, available, member_type_status, st_file_type, member_id, user_id } ] : [] })
+            }
+        })
+        return result
+    } catch (err) {
+        return err
+    }
+}
 
 const add_carpark = data => {
     try {
@@ -58,26 +86,47 @@ const modify_carpark = async data => {
     }
 }
 
-const get_carpark_detail = async data => {
-    try {
-        const { carpark_id } = data
-        if (!carpark_id) throw new Error('carpark_id is required')
-        const sql = `select * from (select c.*, sr.season_rate_id, sr.client_type, sr.vehicle_type, sr.season_type, sr.rate, sr.updated_at as rate_updated_at, sr.updated_by as rate_updated_by, sr.status as rate_status, sr.remarks as rate_remarks, mt.member_type_id, mt.file_type, mt.quota, mt.available, mt.status as member_type_status, st.file_type as st_file_type from carpark c left join season_rate sr using (carpark_id) left join member_type mt using (member_type_id) left join season_type st on st.season_type_id = sr.season_type) as result where carpark_id = ${db.escape(carpark_id)}`
-        const resp = await db.query(sql)
-        let result, season_rate = []
-        resp.forEach((r, i) => {
-            const { season_rate_id, client_type, vehicle_type, season_type, rate, rate_updated_at, rate_updated_by, rate_status, rate_remarks, member_type_id, file_type, quota, available, member_type_status, st_file_type, ...carpark } = r
-            if (season_rate_id) season_rate.push({ season_rate_id, client_type, vehicle_type, season_type, rate, rate_updated_at, rate_updated_by, rate_status, rate_remarks, member_type_id, file_type, quota, available, member_type_status, st_file_type })
-            if (i === 0) {
-                result = carpark
-            }
-        })
-        result.season_rate = season_rate
-        return result
-    } catch (err) {
-        return err
-    }
-}
+// const get_carpark_detail = async data => {
+//     try {
+//         const { carpark_id } = data
+//         if (!carpark_id) throw new Error('carpark_id is required')
+//         const sql = `select * from (select c.*, sr.season_rate_id, sr.client_type, sr.vehicle_type, sr.season_type, sr.rate, sr.updated_at as rate_updated_at, sr.updated_by as rate_updated_by, sr.status as rate_status, sr.remarks as rate_remarks, mt.member_type_id, mt.file_type, mt.quota, mt.available, mt.status as member_type_status, st.file_type as st_file_type from carpark c left join season_rate sr using (carpark_id) left join member_type mt using (member_type_id) left join season_type st on st.season_type_id = sr.season_type) as result where carpark_id = ${db.escape(carpark_id)} and status = 'ACTIVE' and rate_status = 'ACTIVE'`
+//         const resp = await db.query(sql)
+//         let result, season_rate = []
+//         resp.forEach((r, i) => {
+//             const { season_rate_id, client_type, vehicle_type, season_type, rate, rate_updated_at, rate_updated_by, rate_status, rate_remarks, member_type_id, file_type, quota, available, member_type_status, st_file_type, ...carpark } = r
+//             if (season_rate_id) season_rate.push({ season_rate_id, client_type, vehicle_type, season_type, rate, rate_updated_at, rate_updated_by, rate_status, rate_remarks, member_type_id, file_type, quota, available, member_type_status, st_file_type })
+//             if (i === 0) {
+//                 result = carpark
+//             }
+//         })
+//         result.season_rate = season_rate
+//         return result
+//     } catch (err) {
+//         return err
+//     }
+// }
+
+// const get_my_carpark_detail = async data => {
+//     try {
+//         const { carpark_id, user: { user_id } } = data
+//         if (!carpark_id) throw new Error('carpark_id is required')
+//         const sql = `select * from (select c.*, sr.season_rate_id, sr.client_type, sr.vehicle_type, sr.season_type, sr.rate, sr.updated_at as rate_updated_at, sr.updated_by as rate_updated_by, sr.status as rate_status, sr.remarks as rate_remarks, mt.member_type_id, mt.file_type, mt.quota, mt.available, mt.status as member_type_status, st.file_type as st_file_type, m.member_id, m.user_id from carpark c left join season_rate sr using (carpark_id) left join member_type mt using (member_type_id) left join season_type st on st.season_type_id = sr.season_type left join member m using(member_type_id)) as result where carpark_id = ${db.escape(carpark_id)} and status = 'ACTIVE' and rate_status = 'ACTIVE' and (member_type_id is null or user_id = ${db.escape(user_id)})`
+//         const resp = await db.query(sql)
+//         let result, season_rate = []
+//         resp.forEach((r, i) => {
+//             const { season_rate_id, client_type, vehicle_type, season_type, rate, rate_updated_at, rate_updated_by, rate_status, rate_remarks, member_type_id, file_type, quota, available, member_type_status, st_file_type, member_id, user_id, ...carpark } = r
+//             if (season_rate_id) season_rate.push({ season_rate_id, client_type, vehicle_type, season_type, rate, rate_updated_at, rate_updated_by, rate_status, rate_remarks, member_type_id, file_type, quota, available, member_type_status, st_file_type, member_id, user_id })
+//             if (i === 0) {
+//                 result = carpark
+//             }
+//         })
+//         result.season_rate = season_rate
+//         return result
+//     } catch (err) {
+//         return err
+//     }
+// }
 
 const add_season_rate = async data => {
     try {
@@ -126,9 +175,11 @@ const list_season_type = async data => {
 module.exports = {
     list_carpark,
     list_all_carpark,
+    list_my_carpark,
     add_carpark,
     modify_carpark,
     get_carpark_detail,
+    get_my_carpark_detail,
     add_season_rate,
     modify_season_rate,
     add_season_type,
