@@ -32,7 +32,7 @@ const create_season = async data => {
         const item = { carpark_id, card_type, card_number, start_date, end_date, first_start_date, season_type, vehicle_number, vehicle_type, holder_id, holder_name, holder_company, holder_email, holder_contact_number, holder_address, holder_type, file_id, created_at: moment().format('YYYY-MM-DD HH:mm:ss'), updated_at: moment().format('YYYY-MM-DD HH:mm:ss'), created_by, updated_by: created_by, first_season_id, is_latest: true }
         const [carpark, season_rate] = await Promise.all([
             execute_query('get_item_by_condition', {where: {carpark_id}}, 'carpark', db),
-            execute_query('get_item_by_condition', {where: {whereand: {carpark_id, vehicle_type, client_type: holder_type, season_type, status: 'ACTIVE'}}, limit: 1}, 'season_rate', db),
+            execute_query('get_item_by_condition', {where: {whereand: {carpark_id, vehicle_type, season_type, status: 'ACTIVE'}}, limit: 1}, 'season_rate', db),
         ])
         if (!carpark || carpark.length === 0) throw new Error('no carpark')
         else if (moment(carpark[0].start_date).isAfter(moment(start_date))) throw new Error('start date is before carpark start date')
@@ -126,7 +126,7 @@ const add_season_with_invoice = async data => {
             holder_id ? execute_query('get_item_by_condition', { where: { user_id: holder_id }, limit: 1 }, 'user', db) : undefined,
             holder_id ? db.query(`select mt.*, m.user_id, m.file_id from member_type mt left join member m using (member_type_id) where mt.carpark_id = ${db.escape(carpark_id)} and m.user_id = ${db.escape(holder_id)} and mt.status = 'ACTIVE' and m.status = 'ACTIVE' and mt.available > 0`) : undefined
         ])
-        const holder_type = member_data && member_data[0] ? 'TENANT' : 'PUBLIC'
+        const holder_type = member_data && member_data[0] ? 'MEMBER' : 'PUBLIC'
         const holder = holder_data && holder_data.length === 1 ? holder_data[0] : undefined
         vehicle_number = vehicle_number || (vehicle && vehicle.length === 1 ? vehicle[0].vehicle_number : '')
         
@@ -220,7 +220,7 @@ const add_season_by_admin = async data => {
             db.query(`select mt.*, m.user_id, m.file_id from member_type mt left join member m using (member_type_id) where mt.carpark_id = ${db.escape(carpark_id)} and m.user_id = ${db.escape(user_id)} and mt.status = 'ACTIVE' and m.status = 'ACTIVE' and mt.available > 0`)
         ])
         if (!holder && holder.length === 0) throw new Error('user not found')
-        const holder_type = member && member[0] ? 'TENANT' : 'PUBLIC'
+        const holder_type = member && member[0] ? 'MEMBER' : 'PUBLIC'
         const holder_id = user_id
         const holder_name = holder[0].name
         const holder_address = holder[0].address
@@ -251,7 +251,7 @@ const add_season_by_admin_batch = async data => {
 const list_all_season = async data => {
     try {
         const { holder_id } = data
-        const sql = `select s.*, c.carpark_name, c.carpark_code, c.address, c.postal_code, c.public_policy, c.billing_method, c.allow_giro, c.allow_auto_renew, c.status as carpark_status, c.remarks, c.giro_form_id, item.invoice_item_id, item.unit_price, item.quantity, item.amount, item.invoice_id, item.description, item.*, f.file_type, f.name as filename, f.mimetype, f.size, sr.rate, sr.status as rate_status, sr.remarks as rate_remarks from season s left join carpark c using(carpark_id) left join invoice_item item using (season_id) left join file f using (file_id) left join season_rate sr on (sr.carpark_id = c.carpark_id && sr.vehicle_type = s.vehicle_type && sr.client_type = s.holder_type && sr.season_type = s.season_type) where s.holder_id = ${db.escape(holder_id)} and s.status in ('NEW', 'ACTIVE') and s.is_latest = true`
+        const sql = `select s.*, c.carpark_name, c.carpark_code, c.address, c.postal_code, c.public_policy, c.billing_method, c.allow_giro, c.allow_auto_renew, c.status as carpark_status, c.remarks, c.giro_form_id, item.invoice_item_id, item.unit_price, item.quantity, item.amount, item.invoice_id, item.description, item.*, f.file_type, f.name as filename, f.mimetype, f.size, sr.rate, sr.status as rate_status, sr.remarks as rate_remarks from season s left join carpark c using(carpark_id) left join invoice_item item using (season_id) left join file f using (file_id) left join season_rate sr on (sr.carpark_id = c.carpark_id && sr.vehicle_type = s.vehicle_type && sr.season_type = s.season_type) where s.holder_id = ${db.escape(holder_id)} and s.status in ('NEW', 'ACTIVE') and s.is_latest = true`
         const season = await db.query(sql)
         // let result = []
         // season.forEach(s => {
@@ -343,7 +343,7 @@ const list_season = async data => {
         const order = orderby ? `order by ${orderby} ${orderdirection || 'desc'}` : '';
         const limitation = limit === 'no' ? '' : `limit ${limit || '100'}`;
         const offsetion = offset ? `offset ${offset}` : '';
-        const sql = `select s.*, c.carpark_name, c.carpark_code, c.address, c.postal_code, c.public_policy, c.billing_method, c.allow_giro, c.allow_auto_renew, c.status as carpark_status, c.remarks, c.giro_form_id, item.invoice_item_id, item.unit_price, item.quantity, item.amount, item.invoice_id, item.description, item.*, f.file_type, f.name as filename, f.mimetype, f.size, sr.rate, sr.status as rate_status, sr.remarks as rate_remarks from season s left join carpark c using(carpark_id) left join invoice_item item using (season_id) left join file f using (file_id) left join season_rate sr on (sr.carpark_id = c.carpark_id && sr.vehicle_type = s.vehicle_type && sr.client_type = s.holder_type && sr.season_type = s.season_type) where s.is_latest = true and ${prepare_where(where, db)} ${order} ${limitation} ${offsetion}`
+        const sql = `select s.*, c.carpark_name, c.carpark_code, c.address, c.postal_code, c.public_policy, c.billing_method, c.allow_giro, c.allow_auto_renew, c.status as carpark_status, c.remarks, c.giro_form_id, item.invoice_item_id, item.unit_price, item.quantity, item.amount, item.invoice_id, item.description, item.*, f.file_type, f.name as filename, f.mimetype, f.size, sr.rate, sr.status as rate_status, sr.remarks as rate_remarks from season s left join carpark c using(carpark_id) left join invoice_item item using (season_id) left join file f using (file_id) left join season_rate sr on (sr.carpark_id = c.carpark_id && sr.vehicle_type = s.vehicle_type && sr.season_type = s.season_type) where s.is_latest = true and ${prepare_where(where, db)} ${order} ${limitation} ${offsetion}`
         const season = await db.query(sql)
         // let result = []
         // season.forEach(s => {

@@ -68,14 +68,13 @@ const checkout_invoice = async data => {
         if (resp.success) {
             const season_id = invoice.map(e => e.season_id)
             const first_season_id =invoice.map(e => e.first_season_id)
-            // const member_season_id = seasons.filter(s => s.holder_type === 'TENANT').map(s => s.season_id)
             const ids = Array.isArray(invoice_id) ? invoice_id : [invoice_id]
             await Promise.all([
                 ...ids.map((id, i) => db.query(`update invoice set status = 'PAID', invoice_number = ${db.escape(`INV/${fill_zero(last_invoice_number_count + i + 1)}/${moment().year()}`)} where invoice_id = ${db.escape(id)}`)),
                 // db.query(`update invoice set status = 'PAID', invoice_number =  where invoice_id in (${invoice_id.toString()})`),
                 db.query(`update season set status = 'ACTIVE' where season_id in (${season_id.toString()})`),
                 db.query(`update season set is_latest = false where first_season_id in (${first_season_id.toString()}) and is_latest = true and season_id not in (${season_id.toString()})`),
-                db.query(`update member m join season s on s.carpark_id = m.carpark_id and s.holder_id = m.user_id set m.quota = m.quota - 1 where m.status = 'ACTIVE' and s.holder_type = 'TENANT' and s.season_id in (${season_id.toString()})`)
+                db.query(`update member_type mt left join season_rate sr using (member_type_id) left join season s on sr.carpark_id = s.carpark_id set mt.available = mt.available - 1 where s.season_id in (${season_id.toString()})`)
             ])
             return `checkout invoice success for invoice_id ${invoice_id}`
         } else {

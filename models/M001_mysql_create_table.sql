@@ -44,7 +44,6 @@ CONSTRAINT carpark_id_pk PRIMARY KEY(carpark_id)
 CREATE TABLE IF NOT EXISTS season_rate (
 season_rate_id SERIAL NOT NULL,
 carpark_id INT UNSIGNED,
-client_type VARCHAR(20),
 vehicle_type ENUM('CAR', 'MOTOR', 'LORRY'),
 season_type VARCHAR(30) not null default 'NORMAL',
 rate INT UNSIGNED,
@@ -138,8 +137,8 @@ CONSTRAINT vehicle_id_pk PRIMARY KEY(vehicle_id)
 );
 
 insert into carpark (carpark_name, carpark_code, address, postal_code, public_policy, billing_method, tenant_slot_total, tenant_slot_available, public_slot_total, public_slot_available, updated_at, updated_by, remarks) values ('test carpark', 'test001', 'test address', '123456', 'ALLOW', 'CREDIT_CARD,PAYNOW,CHECK,GIRO', 100, 100, 50, 50, NOW(), 'sys init', 'test carpark');
-insert into season_rate (carpark_id, client_type, vehicle_type, rate, updated_at, updated_by, remarks) values ((select carpark_id from carpark where carpark_name='test carpark'), 'TENANT', 'CAR', 100, NOW(), 'sys init', 'car rate for tenant for test carpark');
-insert into season_rate (carpark_id, client_type, vehicle_type, rate, updated_at, updated_by, remarks) values ((select carpark_id from carpark where carpark_name='test carpark'), 'PUBLIC', 'CAR', 120, NOW(), 'sys init', 'car rate for public for test carpark');
+insert into season_rate (carpark_id, vehicle_type, rate, updated_at, updated_by, remarks) values ((select carpark_id from carpark where carpark_name='test carpark'), 'CAR', 100, NOW(), 'sys init', 'car rate for tenant for test carpark');
+insert into season_rate (carpark_id, vehicle_type, rate, updated_at, updated_by, remarks) values ((select carpark_id from carpark where carpark_name='test carpark'), 'CAR', 120, NOW(), 'sys init', 'car rate for public for test carpark');
 
 CREATE TABLE IF NOT EXISTS iu_type ( 
 iu_type_id SERIAL NOT NULL,	
