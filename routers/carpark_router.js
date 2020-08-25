@@ -4,8 +4,9 @@ const carpark = require('../services/carpark')
 const { pass_user, verify_user, verify_admin } = require('../services/auth')
 
 carpark_router.route('/list_carpark')
-.post(async (req, res, next) => {
+.post(pass_user, async (req, res, next) => {
     try {
+        req.body.data.user = req.user
         req.data = await carpark.list_carpark(req.body.data)
         next()
     } catch (err) {
