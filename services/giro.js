@@ -52,10 +52,22 @@ const giro_success = async data => {
         if (Number.isInteger(unit_price)) unit_price = unit_price.toFixed(2)
         if (Number.isInteger(invoice_amount)) invoice_amount = invoice_amount.toFixed(2)
         const sql1 = `select invoice_number from invoice where status = 'PAID' and SUBSTRING(invoice_number, -4, 4) = YEAR(CURDATE()) order by SUBSTRING(invoice_number, 5, 6) desc limit 1`
-        const [last_invoice, carpark] = await Promise.all([db.query(sql1), db.query(`select * from carpark where carpark_id = ${db.escape(carpark_id)}`)])
+        const [last_invoice, carpark, system_config] = await Promise.all([
+            db.query(sql1), 
+            db.query(`select * from carpark where carpark_id = ${db.escape(carpark_id)}`),
+            execute_query('get_item_by_condition', {where: {type: 'COMPANY_INFO'}}, 'system_config', db)
+        ])
+        if (!system_config) throw new Error('no system config')
+        const supplier_name = system_config.find(e => e.config_key === 'name') ? system_config.find(e => e.config_key === 'name').config_value : ''
+        const supplier_address = system_config.find(e => e.config_key === 'address') ? system_config.find(e => e.config_key === 'address').config_value : ''
+        const supplier_email = system_config.find(e => e.config_key === 'email') ? system_config.find(e => e.config_key === 'email').config_value : ''
+        const supplier_contact_number = system_config.find(e => e.config_key === 'contact_number') ? system_config.find(e => e.config_key === 'contact_number').config_value : ''
+        const supplier_fax = system_config.find(e => e.config_key === 'fax') ? system_config.find(e => e.config_key === 'fax').config_value : ''
+        const supplier_uen = system_config.find(e => e.config_key === 'uen') ? system_config.find(e => e.config_key === 'uen').config_value : ''
+        const supplier_rcb = system_config.find(e => e.config_key === 'rcb') ? system_config.find(e => e.config_key === 'rcb').config_value : ''
         const last_invoice_number_count = last_invoice[0] ? parseInt(last_invoice[0].invoice_number.slice(4, 10)) : 1
         const invoice_number = `INV/${fill_zero(last_invoice_number_count + 1)}/${moment().year()}`
-        const inv = { invoice_number, invoice_type: 'RENEW', invoice_amount, buyer_id, buyer_name, buyer_company, buyer_contact_number, buyer_address, buyer_email, total_amount, carpark_id, carpark_name: carpark[0].carpark_name, carpark_address: carpark[0].address, created_by: 'GIRO', updated_by: 'GIRO', created_at: moment().format('YYYY-MM-DD HH:mm:ss'), updated_at: moment().format('YYYY-MM-DD HH:mm:ss') }
+        const inv = { invoice_number, invoice_type: 'RENEW', invoice_amount, buyer_id, buyer_name, buyer_company, buyer_contact_number, buyer_address, buyer_email, total_amount, carpark_id, carpark_name: carpark[0].carpark_name, carpark_address: carpark[0].address, created_by: 'GIRO', updated_by: 'GIRO', created_at: moment().format('YYYY-MM-DD HH:mm:ss'), updated_at: moment().format('YYYY-MM-DD HH:mm:ss'), invoice_date: moment().format('YYYY-MM-DD'), attn: 'GIRO', supplier_name, supplier_address, supplier_email, supplier_contact_number, supplier_fax, supplier_uen, supplier_rcb }
         const creat_inv = await execute_query('create_item', inv, 'invoice', db)
         const { insertId: invoice_id } = creat_inv
         const inv_item = { season_id, invoice_id, unit_price, quantity, amount, description }

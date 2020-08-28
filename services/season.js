@@ -49,6 +49,7 @@ const create_season = async data => {
         } else {
             quantity = moment(end_date).startOf('month').diff(moment(start_date).startOf('month'), 'month')
         }
+        console.log('quantity', quantity)
         const amount = unit_price * quantity
         const description = `${first_season_id ? 'Renew' : 'Purchase new'} season for ${quantity} ${quantity === 1 ? 'month' : 'months'}`
         const season = await execute_query('create_item', item, 'season', db)
