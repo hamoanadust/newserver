@@ -1,6 +1,7 @@
 const express = require('express')
 const season_router = express.Router()
 const season = require('../services/season')
+const giro = require('../services/giro')
 const { pass_user, verify_user, verify_admin } = require('../services/auth')
 
 season_router.route('/find_season')
@@ -141,6 +142,50 @@ season_router.route('/set_auto_renew')
     try {
         req.body.data.user = req.user
         req.data = await season.set_auto_renew(req.body.data)
+        next()
+    } catch (err) {
+        throw err
+    }
+})
+
+season_router.route('/add_giro_form')
+.post(verify_admin, async (req, res, next) => {
+    try {
+        req.body.data.user = req.user
+        req.data = await giro.add_giro_form(req.body.data)
+        next()
+    } catch (err) {
+        throw err
+    }
+})
+
+season_router.route('/list_giro')
+.post(verify_admin, async (req, res, next) => {
+    try {
+        req.body.data.user = req.user
+        req.data = await giro.list_giro(req.body.data)
+        next()
+    } catch (err) {
+        throw err
+    }
+})
+
+season_router.route('/giro_success')
+.post(verify_admin, async (req, res, next) => {
+    try {
+        req.body.data.user = req.user
+        req.data = await giro.giro_success(req.body.data)
+        next()
+    } catch (err) {
+        throw err
+    }
+})
+
+season_router.route('/update_giro')
+.post(verify_admin, async (req, res, next) => {
+    try {
+        req.body.data.user = req.user
+        req.data = await giro.update_giro(req.body.data)
         next()
     } catch (err) {
         throw err
