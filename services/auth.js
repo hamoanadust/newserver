@@ -31,6 +31,7 @@ passport.use('user', new JwtStrategy(opts,
 passport.use('admin', new JwtStrategy(opts,
     async (jwt_payload, done) => {
         db.pool.query("SELECT username, role, user_id FROM user WHERE role like '%admin%' and user_id = " + jwt_payload.user_id, (err, rows) => {
+            console.log(rows)
             if (err) {
                 return done(err, false)
             } else if (rows.length > 0) {
