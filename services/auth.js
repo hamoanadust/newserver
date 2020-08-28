@@ -68,6 +68,7 @@ const verify_user = (req, res, next) => {
 }
 
 const verify_admin = (req, res, next) => {
+    console.log(req.header)
     passport.authenticate('admin', {session: false}, (err, user) => {
         if (err) {
             res.json({success: false, statusCode: 403, message: err.message})
