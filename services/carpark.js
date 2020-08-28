@@ -16,7 +16,7 @@ const list_carpark = async data => {
                 mt.member_type_id, mt.file_type, mt.quota, mt.available, mt.status as member_type_status, 
                 st.file_type as st_file_type, 
                 m.member_id, m.user_id,
-                f.file_id as st_file_id, f.user_id as st_user_id, f.name as st_filename, f.mimetype as st_mimetype, f.size as st_size
+                f.file_id as st_file_id, f.user_id as st_user_id, f.name as st_filename, f.mimetype as st_mimetype, f.size as st_size,
                 gm.form_name, gm.bank_name
                 from carpark c 
                 left join season_rate sr using (carpark_id) 
