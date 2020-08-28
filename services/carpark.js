@@ -17,12 +17,14 @@ const list_carpark = async data => {
                 st.file_type as st_file_type, 
                 m.member_id, m.user_id,
                 f.file_id as st_file_id, f.user_id as st_user_id, f.name as st_filename, f.mimetype as st_mimetype, f.size as st_size
+                gm.form_name, gm.bank_name
                 from carpark c 
                 left join season_rate sr using (carpark_id) 
                 left join member_type mt using (member_type_id) 
                 left join season_type st on st.season_type_id = sr.season_type 
                 left join member m on (m.member_type_id = mt.member_type_id and m.user_id = ${db.escape(user_id)}) 
                 left join file f on (f.file_type = st.file_type and f.user_id = ${db.escape(user_id)})
+                left join giro_form gm using (giro_form_id)
             where c.status = 'ACTIVE' and sr.status = 'ACTIVE') as result
         where ${prepare_where(where, db)} ${order} ${limitation} ${offsetion}`
         const resp = await db.query(sql)

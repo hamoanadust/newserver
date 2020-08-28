@@ -27,7 +27,7 @@ const find_season = async data => {
 
 const create_season = async data => {
     try {
-        let { carpark_id, card_type, card_number, start_date, end_date, first_start_date, season_type = 'NORMAL', vehicle_number, vehicle_type, holder_id, holder_name, holder_company, holder_email, holder_contact_number, holder_address, holder_type, file_id, created_by, first_season_id } = data
+        let { carpark_id, card_type, card_number, start_date, end_date, first_start_date, season_type = 'NORMAL', vehicle_number, vehicle_type, holder_id, holder_name, holder_company, holder_email, holder_contact_number, holder_address, holder_type, file_id, created_by, first_season_id, giro } = data
       
         const item = { carpark_id, card_type, card_number, start_date, end_date, first_start_date, season_type, vehicle_number, vehicle_type, holder_id, holder_name, holder_company, holder_email, holder_contact_number, holder_address, holder_type, file_id, created_at: moment().format('YYYY-MM-DD HH:mm:ss'), updated_at: moment().format('YYYY-MM-DD HH:mm:ss'), created_by, updated_by: created_by, first_season_id, is_latest: true }
         const [carpark, season_rate] = await Promise.all([
@@ -38,7 +38,7 @@ const create_season = async data => {
         else if (moment(carpark[0].start_date).isAfter(moment(start_date))) throw new Error('start date is before carpark start date')
         else if (moment(end_date).isAfter(moment(carpark[0].end_date))) throw new Error('end date is after carpark end date')
         else if (!season_rate || season_rate.length === 0) throw new Error('no season rate')
-        const { carpark_name, carpark_code, address: carpark_address, postal_code, allow_prorate } = carpark[0]
+        const { carpark_name, carpark_code, address: carpark_address, postal_code, allow_prorate, allow_giro, giro_form_id } = carpark[0]
 
         const unit_price = season_rate[0].rate
         let quantity
@@ -57,6 +57,9 @@ const create_season = async data => {
         if (!first_season_id) {
             first_season_id = season_id
             await execute_query('update_item_by_id', { id: season_id, condition: { first_season_id } }, 'season', db)
+        }
+        if (allow_giro && giro) {
+            await execute_query('create_item', { season_id, giro_form_id, status: 'SUBMITTED', created_at: moment().format('YYYY-MM-DD HH:mm:ss'), updated_at: moment().format('YYYY-MM-DD HH:mm:ss') }, 'giro', db)
         }
         return { ...item, unit_price, quantity, amount, description, season_id, carpark_name, carpark_code, carpark_address, postal_code, first_season_id, invoice_item: { unit_price, quantity, amount, description, season_id } }
     } catch(err) {
@@ -104,8 +107,8 @@ const create_invoice = async data => {
 const add_season_with_invoice = async data => {
     try {
         let { carpark_id, card_number, start_date, end_date, //required
-            card_type, vehicle_type, season_type = 'NORMAL', attn, vehicle_id, created_by,  //optional with a default value
-            vehicle_number, holder_id, holder_name, holder_company, holder_address, holder_contact_number, holder_email,//optional
+            card_type = 'IU', vehicle_type = 'CAR', season_type = 'NORMAL', attn = 'system', vehicle_id, created_by,  //optional with a default value
+            vehicle_number, holder_id, holder_name, holder_company, holder_address, holder_contact_number, holder_email, giro, //optional
             user } = data//from middleware
         if (!carpark_id) throw new Error('no carpark id')
         else if (!card_number) throw new Error('no card number')
@@ -117,9 +120,6 @@ const add_season_with_invoice = async data => {
         } else if (moment(start_date).date() >= 15 && moment(end_date).diff(moment(start_date), 'month') < 1) {
             throw new Error('start date after 15, end date must be at least the end of the next month')
         }
-        attn = attn || 'system'
-        card_type = card_type || 'IU'
-        vehicle_type = vehicle_type || 'CAR'
         holder_id = holder_id || (user ? user.user_id : undefined)
         const [vehicle, holder_data, member_data] = await Promise.all([
             vehicle_id ? execute_query('get_item_by_condition', { where: { vehicle_id } }, 'vehicle', db) : undefined,
@@ -136,7 +136,7 @@ const add_season_with_invoice = async data => {
         holder_contact_number = holder_contact_number || (holder ? holder.contact_number : undefined) || (user ? user.contact_number : '')
         holder_email = holder_email || (holder ? holder.email : undefined) || (user ? user.email : '')
         created_by = created_by || holder_name
-        let season_data = { carpark_id, card_number, start_date, end_date, first_start_date: start_date, card_type, vehicle_type, season_type, holder_type, vehicle_number, holder_id, holder_name, holder_company, holder_address, holder_contact_number, holder_email, created_by }
+        let season_data = { carpark_id, card_number, start_date, end_date, first_start_date: start_date, card_type, vehicle_type, season_type, holder_type, vehicle_number, holder_id, holder_name, holder_company, holder_address, holder_contact_number, holder_email, created_by, giro }
         //special season type requires upload file before___________________________________________________________
         if (season_type !== 'NORMAL') {
             const sstype = await execute_query('get_item_by_condition', { where: { whereand: { status: 'ACTIVE', season_type_id: season_type } } }, 'season_type', db)
@@ -214,7 +214,7 @@ const renew_season_batch = async data => {
 
 const add_season_by_admin = async data => {
     try {
-        const { carpark_id, start_date, end_date, card_number, vehicle_number, card_type, vehicle_type, season_type = 'NORMAL', attn, user_id, user } = data
+        const { carpark_id, start_date, end_date, card_number, vehicle_number, card_type, vehicle_type, season_type = 'NORMAL', attn, user_id, user, giro } = data
         const [holder, member] = await Promise.all([
             execute_query('get_item_by_condition', { where: { user_id }, limit: 1 }, 'user', db),
             db.query(`select mt.*, m.user_id, m.file_id from member_type mt left join member m using (member_type_id) where mt.carpark_id = ${db.escape(carpark_id)} and m.user_id = ${db.escape(user_id)} and mt.status = 'ACTIVE' and m.status = 'ACTIVE' and mt.available > 0`)
@@ -228,7 +228,7 @@ const add_season_by_admin = async data => {
         const holder_contact_number = holder[0].contact_number
         const holder_email = holder[0].email
         const created_by = user.username
-        const item = { carpark_id, start_date, end_date, card_number, vehicle_number, card_type, vehicle_type, season_type, holder_type, attn, holder_id, holder_name, holder_address, holder_company, holder_contact_number, holder_email, created_by }
+        const item = { carpark_id, start_date, end_date, card_number, vehicle_number, card_type, vehicle_type, season_type, holder_type, attn, holder_id, holder_name, holder_address, holder_company, holder_contact_number, holder_email, created_by, giro }
         const resp = await add_season_with_invoice(item)
         return resp
     } catch (err) {

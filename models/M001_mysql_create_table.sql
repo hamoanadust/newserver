@@ -268,6 +268,34 @@ CREATE TABLE IF NOT EXISTS season_type (
     CONSTRAINT season_type_id_pk PRIMARY KEY(season_type_id)
 );
 
+CREATE TABLE IF NOT EXISTS giro (
+    giro_id SERIAL NOT NULL,
+    season_id int,
+    giro_number varchar(50),
+    account_number varchar(10),
+    giro_form_id int,
+    status enum('SUBMITTED', 'PENDING', 'ACTIVE', 'INACTIVE') not null default 'INACTIVE',
+    created_at datetime,
+    updated_at datetime,
+    CONSTRAINT giro_id_pk PRIMARY KEY(giro_id)
+);
+
+CREATE TABLE IF NOT EXISTS giro_form (
+    giro_form_id SERIAL NOT NULL,
+    form_name varchar(30),
+    bank_name varchar(30),
+    CONSTRAINT giro_form_id_pk PRIMARY KEY(giro_form_id)
+);
+
+CREATE TABLE IF NOT EXISTS season_sync (
+    season_sync_id SERIAL NOT NULL,
+    season_id int,
+    status enum('NEW', 'SYNCED') not null default 'INACTIVE',
+    sync_at datetime,
+    created_at datetime,
+    CONSTRAINT season_sync_id_pk PRIMARY KEY(season_sync_id)
+);
+
 
 insert into iu_type (initial_number, vehicle_type) values
 ('{001, 002, 003, 004}', 'FREE'),
