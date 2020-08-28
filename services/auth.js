@@ -16,7 +16,6 @@ opts.secretOrKey = config.secretKey
 passport.use('user', new JwtStrategy(opts,
     async (jwt_payload, done) => {
         db.pool.query("SELECT user_id, customer_id, username, role, name, email, company, contact_number FROM user WHERE user_id = " + jwt_payload.user_id, (err, rows) => {
-            console.log(rows)
             if (err) {
                 return done(err, false)
             } else if (rows.length > 0) {
@@ -31,7 +30,6 @@ passport.use('user', new JwtStrategy(opts,
 passport.use('admin', new JwtStrategy(opts,
     async (jwt_payload, done) => {
         db.pool.query("SELECT username, role, user_id FROM user WHERE role like '%admin%' and user_id = " + jwt_payload.user_id, (err, rows) => {
-            console.log(rows)
             if (err) {
                 return done(err, false)
             } else if (rows.length > 0) {
@@ -68,7 +66,6 @@ const verify_user = (req, res, next) => {
 }
 
 const verify_admin = (req, res, next) => {
-    console.log(req.header)
     passport.authenticate('admin', {session: false}, (err, user) => {
         if (err) {
             res.json({success: false, statusCode: 403, message: err.message})

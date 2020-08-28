@@ -1,5 +1,6 @@
 const db = require('./db')
 const { execute_query, prepare_where } = require('./dao')
+const { fill_zero } = require('./tool')
 const moment = require('moment')
 
 const add_giro_form = async data => {
@@ -14,11 +15,11 @@ const add_giro_form = async data => {
 
 const list_giro = async data => {
     try {
-        const { where = { status: 'ACTIVE' }, limit, offset, orderby, orderdirection } = data
+        const { where = { giro_status: ['ACTIVE', 'SUBMITTED', 'PENDING'] }, limit, offset, orderby, orderdirection } = data
         const order = orderby ? `order by ${orderby} ${orderdirection || 'desc'}` : '';
         const limitation = limit === 'no' ? '' : `limit ${limit || '100'}`;
         const offsetion = offset ? `offset ${offset}` : '';
-        const sql = `select * from (select g.giro_id, g.giro_number, g.account_number, g.giro_form_id, g.status as giro_status, g.created_at as giro_created_at, g.updated_at as giro_updated_at, gm.form_name, gm.bank_name, s.* from giro g left join giro_form gm using (giro_form_id) left join season s using (season_id)) as result where ${prepare_where(where, db)} ${order} ${limitation} ${offsetion}`
+        const sql = `select * from (select g.giro_id, g.giro_number, g.account_number, g.giro_form_id, g.status as giro_status, g.created_at as giro_created_at, g.updated_at as giro_updated_at, gm.form_name, gm.bank_name, s.*, sr.rate from giro g left join giro_form gm using (giro_form_id) left join season s using (season_id) left join season_rate sr on (s.carpark_id = sr.carpark_id && s.vehicle_type = sr.vehicle_type && s.season_type = sr.season_type)) as result where ${prepare_where(where, db)} ${order} ${limitation} ${offsetion}`
         const resp = await db.query(sql)
         return resp
     } catch(err) {
