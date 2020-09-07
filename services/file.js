@@ -11,7 +11,7 @@ const upload = async data => {
         if(!files) throw new Error('No file uploaded')
         console.log(data)
         const arr = []
-        [1,2,3,4,5].forEach(i => {
+        ([1,2,3,4,5]).forEach(i => {
             if (files[`f${i}`] && data[`t${i}`]) {
                 arr.push({ file: files[`f${i}`], file_type: data[`t${i}`] })
             }
@@ -32,8 +32,8 @@ const upload = async data => {
 
 const upload_file = async data => {
     try {
-        let { files, user, body: { file_type } } = data
-        return upload({ files, user, file_type })
+        let { files, user, body: { t1, t2, t3, t4, t5 } } = data
+        return upload({ files, user, t1, t2, t3, t4, t5 })
     } catch(err) {
         return err
     }
