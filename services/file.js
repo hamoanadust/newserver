@@ -7,18 +7,24 @@ const moment = require('moment')
 
 const upload = async data => {
     try {
-        const { files, user: { user_id }, file_type } = data
+        const { files, user: { user_id } } = data
         if(!files) throw new Error('No file uploaded')
-        console.log(files)
-        const { file } = files
-        if(!file_type) throw new Error('file_type is required')
-        const { name, mimetype, size } = file
-        if (!fs.existsSync(path.join(__dirname, `/../../uploads/${user_id}`))) fs.mkdirSync(path.join(__dirname, `/../../uploads/${user_id}`), { recursive: true })
-        const file_name = `${name}${generate_random_integer()}`
-        const file_path = path.join(__dirname, `/../../uploads/${user_id}/`) + file_name
-        file.mv(`./uploads/${user_id}/${file_name}`)
-        const createFile = await create_file({ file_name, name, mimetype, size, user_id, file_path, file_type })
-        return createFile
+        console.log(data)
+        const arr = []
+        [1,2,3,4,5].forEach(i => {
+            if (files[`f${i}`] && data[`t${i}`]) {
+                arr.push({ file: files[`f${i}`], file_type: data[`t${i}`] })
+            }
+        })
+        if(arr.length === 0) throw new Error('please supply proper file and file_type')
+        return Promise.all(arr.map(e => {
+            const { file: { name, mimetype, size }, file_type } = e
+            if (!fs.existsSync(path.join(__dirname, `/../../uploads/${user_id}`))) fs.mkdirSync(path.join(__dirname, `/../../uploads/${user_id}`), { recursive: true })
+            const file_name = `${name}${generate_random_integer()}`
+            const file_path = path.join(__dirname, `/../../uploads/${user_id}/`) + file_name
+            file.mv(`./uploads/${user_id}/${file_name}`)
+            return create_file({ file_name, name, mimetype, size, user_id, file_path, file_type })
+        }))
     } catch(err) {
         throw err
     }
