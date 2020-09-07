@@ -9,6 +9,7 @@ const upload = async data => {
     try {
         const { files, user: { user_id }, file_type } = data
         if(!files) throw new Error('No file uploaded')
+        console.log(files)
         const { file } = files
         if(!file_type) throw new Error('file_type is required')
         const { name, mimetype, size } = file
