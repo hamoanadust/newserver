@@ -9,10 +9,8 @@ const upload = async data => {
     try {
         const { files, user: { user_id } } = data
         if(!files) throw new Error('No file uploaded')
-        console.log(data)
         const arr = []
         const index = [1,2,3,4,5]
-        console.log(index)
         index.forEach(i => {
             if (files[`f${i}`] && data[`t${i}`]) {
                 arr.push({ file: files[`f${i}`], file_type: data[`t${i}`] })
