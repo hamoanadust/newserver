@@ -24,7 +24,7 @@ const upload = async data => {
             if (!fs.existsSync(path.join(__dirname, `/../../uploads/${user_id}`))) fs.mkdirSync(path.join(__dirname, `/../../uploads/${user_id}`), { recursive: true })
             const file_name = `${name}${generate_random_integer()}`
             const file_path = path.join(__dirname, `/../../uploads/${user_id}/`) + file_name
-            file.mv(`./uploads/${user_id}/${file_name}`)
+            e.file.mv(`./uploads/${user_id}/${file_name}`)
             return create_file({ file_name, name, mimetype, size, user_id, file_path, file_type })
         }))
     } catch(err) {
