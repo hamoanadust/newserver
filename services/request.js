@@ -11,7 +11,7 @@ const list_all_request = async data => {
     } catch (err) {
         return err
     }
-}//
+}
 
 const list_request = data => {
     try {
